@@ -1,9 +1,10 @@
 export class Flashcard {
   constructor(
-    public readonly front: string,
-    public readonly back: string,
-    public readonly hint?: string,
-    public readonly tags: ReadonlyArray<string> = []
+    public readonly front: string,        // Required parameter
+    public readonly back: string,         // Required parameter
+    public readonly deckId: string,       // Required parameter
+    public readonly hint?: string,        // Optional parameter
+    public readonly tags: ReadonlyArray<string> = [] // Optional parameter with default value
   ) {}
 }
 
