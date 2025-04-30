@@ -27,7 +27,15 @@ export interface ProgressStats {
     }>;
 }
 
+export interface Flashcard {
+    id: string;            // Required property
+    front: string;         // Required property
+    back: string;          // Required property
+    hint?: string;         // Optional property
+    tags: string[];        // Mutable property
+    deckId: string;        // Required property
+  }
+
 // --- Re-export Core Types ---
-export type Flashcard = CoreFlashcard;
 export type AnswerDifficulty = CoreDifficulty;
 export type BucketMap = CoreBucketMap;
