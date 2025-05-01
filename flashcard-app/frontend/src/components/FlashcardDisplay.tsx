@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import { fetchHint } from '../services/api';
+import styles from './FlashcardDisplay.module.css';
 
 // Define the Flashcard type if it's not imported from '../types'
 interface Flashcard {
-    id: string;
-    front: string;
-    back: string;
-    hint?: string;
-    tags: string[];
-    deckId: string;
-  }
-  
-  export enum AnswerDifficulty {
-    Easy = "EASY",
-    Hard = "HARD",
-    Wrong = "WRONG"
-  }
+  id: string;
+  front: string;
+  back: string;
+  hint?: string;
+  tags: string[];
+  deckId: string;
+}
 
 interface FlashcardDisplayProps {
   card: Flashcard;
@@ -42,45 +37,45 @@ const FlashcardDisplay: React.FC<FlashcardDisplayProps> = ({ card, showBack }) =
   };
 
   return (
-    <div className="flashcard">
-      <div className="flashcard-content">
-        <div className="flashcard-front">
-          <h3>Question:</h3>
-          <p>{card.front}</p>
+    <div className={styles.flashcard}>
+      <div className={styles.flashcardContent}>
+        <div className={styles.flashcardSection}>
+          <h3 className={styles.sectionTitle}>Question:</h3>
+          <p className={styles.cardText}>{card.front}</p>
         </div>
         
-        <div className="flashcard-back">
-          <h3>Answer:</h3>
-          <p>{showBack ? card.back : '???'}</p>
+        <div className={styles.flashcardSection}>
+          <h3 className={styles.sectionTitle}>Answer:</h3>
+          <p className={styles.cardText}>{showBack ? card.back : '???'}</p>
         </div>
         
         {!showBack && (
-          <div className="flashcard-hint">
+          <div className={styles.hintSection}>
             {!hint && !loadingHint && !hintError && (
               <button 
                 onClick={handleGetHint} 
                 disabled={loadingHint}
-                className="hint-button"
+                className={styles.hintButton}
               >
                 Get Hint
               </button>
             )}
             
-            {loadingHint && <p>Loading hint...</p>}
+            {loadingHint && <p className={styles.loadingText}>Loading hint...</p>}
             
             {hintError && (
-              <div className="hint-error">
+              <div className={styles.hintError}>
                 <p>{hintError}</p>
-                <button onClick={handleGetHint} className="retry-button">
+                <button onClick={handleGetHint} className={styles.retryButton}>
                   Try Again
                 </button>
               </div>
             )}
             
             {hint && (
-              <div className="hint-display">
-                <h4>Hint:</h4>
-                <p>{hint}</p>
+              <div className={styles.hintDisplay}>
+                <h4 className={styles.hintTitle}>Hint:</h4>
+                <p className={styles.hintText}>{hint}</p>
               </div>
             )}
           </div>

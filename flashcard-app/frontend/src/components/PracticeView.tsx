@@ -3,6 +3,7 @@ import { Flashcard } from '../types'; // Frontend type definition
 import { fetchPracticeCards, submitAnswer, advanceDay } from '../services/api';
 import FlashcardDisplay from './FlashcardDisplay';
 import { AnswerDifficulty } from '../../../BackEnd/src/logic/flashcards';
+import styles from './PracticeView.module.css'; // Import the CSS module
 
 const PracticeView: React.FC = () => {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
@@ -82,41 +83,78 @@ const PracticeView: React.FC = () => {
   };
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <div className={styles.loadingContainer}><p className={styles.loadingText}>Loading your cards...</p></div>;
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return <div className={styles.errorContainer}><p className={styles.errorText}>{error}</p></div>;
   }
 
   if (sessionFinished) {
     return (
-      <div>
-        <h2>Session Complete</h2>
-        <button onClick={handleNextDay}>Go to Next Day</button>
+      <div className={styles.sessionComplete}>
+        <h2 className={styles.sessionCompleteTitle}>Session Complete!</h2>
+        <p className={styles.sessionCompleteMessage}>Great job! You've completed all your cards for today.</p>
+        <button className={`${styles.button} ${styles.nextDayButton}`} onClick={handleNextDay}>Go to Next Day</button>
       </div>
     );
   }
 
   if (practiceCards.length === 0) {
-    return <p>No cards to practice today.</p>;
+    return <div className={styles.noCardsContainer}><p className={styles.noCardsText}>No cards to practice today.</p></div>;
   }
 
   const currentCard = practiceCards[currentCardIndex];
 
   return (
-    <div>
-      <h3>Day {day} - Card {currentCardIndex + 1} of {practiceCards.length}</h3>
-      <FlashcardDisplay card={currentCard} showBack={showBack} />
-      {!showBack ? (
-        <button onClick={handleShowBack}>Show Answer</button>
-      ) : (
-        <>
-          <button onClick={() => handleAnswer(AnswerDifficulty.Easy)}>Easy</button>
-          <button onClick={() => handleAnswer(AnswerDifficulty.Hard)}>Hard</button>
-          <button onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>Wrong</button>
-        </>
-      )}
+    <div className={styles.practiceContainer}>
+      <div className={styles.header}>
+        <div className={styles.appTitle}>Flashcard Learner</div>
+        <div className={styles.progressInfo}>
+          <span className={styles.dayCounter}>Day {day}</span>
+          <span className={styles.progressIndicator}>Card {currentCardIndex + 1} of {practiceCards.length}</span>
+        </div>
+      </div>
+      
+      <div className={styles.flashcardContainer}>
+        <FlashcardDisplay card={currentCard} showBack={showBack} />
+      </div>
+      
+      <div className={styles.buttonsContainer}>
+        {!showBack ? (
+          <button 
+            className={`${styles.button} ${styles.showAnswerButton}`} 
+            onClick={handleShowBack}
+          >
+            Show Answer
+          </button>
+        ) : (
+          <>
+            <button 
+              className={`${styles.button} ${styles.easyButton}`} 
+              onClick={() => handleAnswer(AnswerDifficulty.Easy)}
+            >
+              Easy
+            </button>
+            <button 
+              className={`${styles.button} ${styles.hardButton}`} 
+              onClick={() => handleAnswer(AnswerDifficulty.Hard)}
+            >
+              Hard
+            </button>
+            <button 
+              className={`${styles.button} ${styles.wrongButton}`} 
+              onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
+            >
+              Wrong
+            </button>
+          </>
+        )}
+      </div>
+      
+      <div className={styles.footer}>
+        <p>© {new Date().getFullYear()} Flashcard Learner</p>
+      </div>
     </div>
   );
 };
