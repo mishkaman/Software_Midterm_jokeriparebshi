@@ -1,28 +1,20 @@
-import { useState } from 'react'
-
+import PracticeView from './components/PracticeView';
+// Removed CSS import
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Flashcard Learner</h1>
+      </header>
+      <main className="app-content">
+        <PracticeView />
+      </main>
+      <footer className="app-footer">
+        <p>&copy; {new Date().getFullYear()} Flashcard Learner</p>
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
