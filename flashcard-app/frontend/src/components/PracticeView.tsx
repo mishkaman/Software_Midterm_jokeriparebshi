@@ -30,10 +30,10 @@ const PracticeView: React.FC = () => {
         tags: [...card.tags],
         deckId: card.deckId
       }));
-      
+
       setPracticeCards(transformedCards);
       setDay(newDay);
-      
+
       if (transformedCards.length === 0) {
         setSessionFinished(true);
       }
@@ -54,7 +54,7 @@ const PracticeView: React.FC = () => {
 
   const handleAnswer = async (difficulty: AnswerDifficulty) => {
     if (currentCardIndex >= practiceCards.length) return;
-    
+
     const currentCard = practiceCards[currentCardIndex];
 
     try {
@@ -115,45 +115,41 @@ const PracticeView: React.FC = () => {
           <span className={styles.progressIndicator}>Card {currentCardIndex + 1} of {practiceCards.length}</span>
         </div>
       </div>
-      
+
       <div className={styles.flashcardContainer}>
         <FlashcardDisplay card={currentCard} showBack={showBack} />
       </div>
-      
+
       <div className={styles.buttonsContainer}>
         {!showBack ? (
-          <button 
-            className={`${styles.button} ${styles.showAnswerButton}`} 
+          <button
+            className={`${styles.button} ${styles.showAnswerButton}`}
             onClick={handleShowBack}
           >
             Show Answer
           </button>
         ) : (
           <>
-            <button 
-              className={`${styles.button} ${styles.easyButton}`} 
+            <button
+              className={`${styles.button} ${styles.easyButton}`}
               onClick={() => handleAnswer(AnswerDifficulty.Easy)}
             >
               Easy
             </button>
-            <button 
-              className={`${styles.button} ${styles.hardButton}`} 
+            <button
+              className={`${styles.button} ${styles.hardButton}`}
               onClick={() => handleAnswer(AnswerDifficulty.Hard)}
             >
               Hard
             </button>
-            <button 
-              className={`${styles.button} ${styles.wrongButton}`} 
+            <button
+              className={`${styles.button} ${styles.wrongButton}`}
               onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
             >
               Wrong
             </button>
           </>
         )}
-      </div>
-      
-      <div className={styles.footer}>
-        <p>© {new Date().getFullYear()} Flashcard Learner</p>
       </div>
     </div>
   );
