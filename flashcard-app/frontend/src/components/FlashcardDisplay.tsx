@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchHint } from '../services/api';
 import styles from './FlashcardDisplay.module.css';
 
@@ -22,6 +22,10 @@ const FlashcardDisplay: React.FC<FlashcardDisplayProps> = ({ card, showBack }) =
   const [loadingHint, setLoadingHint] = useState(false);
   const [hintError, setHintError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setHint(null)
+  }, [card])
+
   const handleGetHint = async () => {
     try {
       setLoadingHint(true);
@@ -39,30 +43,30 @@ const FlashcardDisplay: React.FC<FlashcardDisplayProps> = ({ card, showBack }) =
   return (
     <div className={styles.flashcard}>
       <div className={styles.flashcardContent}>
-        <div className={styles.flashcardSection}>
+
+        {showBack ? <div className={styles.flashcardSection}>
           <h3 className={styles.sectionTitle}>Question:</h3>
           <p className={styles.cardText}>{card.front}</p>
-        </div>
-        
-        <div className={styles.flashcardSection}>
+        </div> : <div className={styles.flashcardSection}>
           <h3 className={styles.sectionTitle}>Answer:</h3>
-          <p className={styles.cardText}>{showBack ? card.back : '???'}</p>
-        </div>
-        
+          <p className={styles.cardText}>{card.back}</p>
+        </div>}
+
+
         {!showBack && (
           <div className={styles.hintSection}>
             {!hint && !loadingHint && !hintError && (
-              <button 
-                onClick={handleGetHint} 
+              <button
+                onClick={handleGetHint}
                 disabled={loadingHint}
                 className={styles.hintButton}
               >
                 Get Hint
               </button>
             )}
-            
+
             {loadingHint && <p className={styles.loadingText}>Loading hint...</p>}
-            
+
             {hintError && (
               <div className={styles.hintError}>
                 <p>{hintError}</p>
@@ -71,7 +75,7 @@ const FlashcardDisplay: React.FC<FlashcardDisplayProps> = ({ card, showBack }) =
                 </button>
               </div>
             )}
-            
+
             {hint && (
               <div className={styles.hintDisplay}>
                 <h4 className={styles.hintTitle}>Hint:</h4>
