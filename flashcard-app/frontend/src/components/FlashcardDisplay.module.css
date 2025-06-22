@@ -1,154 +1,224 @@
-/* FlashcardDisplay.module.css */
-.flashcard {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* General body and layout */
+body {
+  margin: 0;
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  background-color: #2c3e50; /* Darker blue-gray background */
+  color: #ecf0f1;
 }
 
-.flashcardContent {
-  width: 100%;
-  height: 100%;
+.flashcard-learner-container {
+  height: 100vh;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   padding: 1rem;
 }
 
+.flashcard-wrapper {
+  background: #ecf0f1;
+  color: #2c3e50;
+  padding: 2.5rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
 
-
-.sectionTitle {
-  font-size: 1.4rem;
-  font-weight: 600;
+/* Header and buttons */
+.app-title {
+  font-size: 2rem;
+  font-weight: 700;
   margin-bottom: 1rem;
-  color: #6366f1;
-  position: relative;
-  display: inline-block;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #e67e22; /* Orange accent */
 }
 
-.sectionTitle::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, #6366f1, #8b5cf6);
-  border-radius: 2px;
-}
-
-.cardText {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  font-weight: 500;
-  color: #374151;
-}
-
-.hintSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hintButton {
-  padding: 0.6rem 1.5rem;
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+.day-indicator {
+  background-color: #e67e22;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 40px;
   font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  margin-bottom: 1.2rem;
+  cursor: default;
 }
 
-.hintButton:hover {
-  transform: translateY(-2px);
-}
-
-.hintButton:active {
-  transform: translateY(0);
-}
-
-.loadingText {
-  color: #6b7280;
-  font-style: italic;
-}
-
-.hintError {
-  color: #ef4444;
-  text-align: center;
-}
-
-.retryButton {
-  margin-top: 0.5rem;
-  padding: 0.4rem 1rem;
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.retryButton:hover {
-  background-color: #e5e7eb;
-}
-
-.hintDisplay {
-  text-align: center;
-
-  background-color: #f3f4f6;
-  border-radius: 20px;
-  border: 1.5px solid #6366f1;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.hintTitle {
+/* Session complete */
+.session-complete p {
   font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-next-day {
+  background-color: #3498db;
   color: white;
-}
-
-.hintText {
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  cursor: pointer;
   font-size: 1rem;
-  color: #6b7280;
+  transition: background-color 0.25s ease;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .cardText {
-    color: #e5e7eb;
-  }
+.btn-next-day:hover {
+  background-color: #2980b9;
+}
 
-  .hintDisplay {
-    background-color: #1f2937;
-    border-left-color: #818cf8;
-  }
+/* Card display */
+.card-display {
+  background-color: #ffffff;
+  color: #2c3e50;
+  padding: 1.6rem;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  margin: 1.2rem 0;
+  min-height: 90px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  user-select: none;
+}
 
-  .hintTitle {
-    color: #d1d5db;
-  }
+.card-display.answer-view {
+  background-color: #f39c12; /* Warm amber */
+  color: #1c2833;
+}
 
-  .hintText {
-    color: #9ca3af;
-  }
+/* Card progress */
+.card-progress {
+  font-size: 0.95rem;
+  color: #7f8c8d;
+  font-weight: 600;
+}
 
-  .retryButton {
-    background-color: #374151;
-    color: #d1d5db;
-    border-color: #4b5563;
-  }
+/* Hint box */
+.hint-container {
+  background-color: #f39c12;
+  color: #1c2833;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 1rem;
+  font-style: italic;
+  box-shadow: inset 2px 2px 8px rgba(0,0,0,0.1);
+}
 
-  .retryButton:hover {
-    background-color: #4b5563;
-  }
+/* Action buttons */
+.actions-row {
+  margin-top: 1.3rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
 
-  .loadingText {
-    color: #9ca3af;
-  }
+.btn-hint,
+.btn-show-answer {
+  padding: 0.5rem 1.3rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.btn-hint {
+  background-color: #d35400; /* Darker orange */
+  color: #fff;
+}
+
+.btn-hint:hover {
+  background-color: #b03e00;
+}
+
+.btn-show-answer {
+  background-color: #2980b9; /* Blue */
+  color: #fff;
+}
+
+.btn-show-answer:hover {
+  background-color: #1c5980;
+}
+
+/* Rating section */
+.rating-section {
+  margin-top: 1.8rem;
+  font-size: 1rem;
+  color: #2c3e50;
+  background: #ecf0f1;
+  padding: 1rem 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.rating-section p {
+  margin: 0.4rem 0;
+}
+
+/* Gesture instructions */
+.gesture-instructions {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+/* Rating feedback */
+.rating-feedback {
+  background-color: #27ae60;
+  color: #ecf0f1;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  user-select: none;
+}
+
+.rating-feedback strong {
+  font-size: 1.3rem;
+}
+
+/* Gesture status message */
+.gesture-status {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2980b9;
+}
+
+/* Debug info box */
+.debug-info {
+  margin-top: 0.8rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  background-color: #bdc3c7;
+  color: #2c3e50;
+  padding: 0.5rem 0.75rem;
+  border-radius: 5px;
+  user-select: text;
+}
+
+/* Manual rating buttons */
+.manual-rating-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.manual-rating-buttons button {
+  font-size: 1.8rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: none;
+  background-color: #ecf0f1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.manual-rating-buttons button:hover {
+  background-color: #d0d7de;
+  transform: scale(1.15);
 }

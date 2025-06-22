@@ -1,4 +1,4 @@
-import { Flashcard } from "../logic/types";
+import { Flashcard } from "./logic";
 
 export const flashcards: Flashcard[] = [
   {
