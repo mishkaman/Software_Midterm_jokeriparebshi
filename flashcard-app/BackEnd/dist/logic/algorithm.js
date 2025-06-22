@@ -13,6 +13,27 @@ exports.update = update;
 exports.getHint = getHint;
 exports.computeProgress = computeProgress;
 const flashcards_1 = require("./flashcards");
+import { AnswerDifficulty } from './flashcards'; // 'easy' | 'medium' | 'hard' | 'wrong'
+
+export function getNextBucket(currentBucket: number, difficulty: AnswerDifficulty): number {
+  switch (difficulty) {
+    case 'easy':
+      return Math.min(currentBucket + 2, 5); // Cap at bucket 5
+    case 'medium':
+      return Math.min(currentBucket + 1, 5);
+    case 'hard':
+      return currentBucket; // No promotion
+    case 'wrong':
+      if (currentBucket >= 3) {
+        return Math.max(1, Math.floor(currentBucket / 2)); // Lapse penalty
+      } else {
+        return 0; // Fully reset
+      }
+    default:
+      return currentBucket;
+  }
+}
+
 function toBucketSets(buckets) {
     // Find the maximum bucket number to create an array of the right size
     const maxBucketNumber = Math.max(...[...buckets.keys()].map(Number), 0 // Ensure at least 0-length array if no buckets
