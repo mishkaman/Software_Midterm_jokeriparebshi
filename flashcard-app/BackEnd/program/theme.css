@@ -1,0 +1,13 @@
+/* theme.css */
+#ai-flashcard-button {
+    background-color: #ffb347; /* soft orange */
+    color: #1b1b1b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#ai-flashcard-button:hover {
+    background-color: #ffa726;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    border-color: #f57c00;
+}
