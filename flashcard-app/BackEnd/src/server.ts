@@ -1,6 +1,5 @@
 // backend/src/server.ts
 
-import express from "express";
 import cors from "cors";
 import { Request, Response } from "express";
 
@@ -29,12 +28,58 @@ import {
 } from "./state";
 
 import { PracticeRecord } from "./types";
-import { authenticate } from '../middleware/authenticate'; // path to the middleware
-import { getAllCards, addCard } from '../src/logic'; // your logic
+import { authenticate } from '../src/middleware/authenticate'; // path to the middleware
+import { getAllCards, addCard } from '../src/logic/algorithm'; // your logic
 import bodyParser from 'body-parser';
 import express from 'express';
-import { registerUser, loginUser } from './services/userService';
-import bodyParser from 'body-parser';
+import { registerUser, loginUser } from '../src/logic/algorithm';
+import {
+  getUserCards,
+  createCard,
+  updateCard,
+  deleteCard
+} from './services/cards';
+
+const app = express();
+app.use(express.json());
+
+// GET all flashcards
+app.get('/api/cards', authenticate, (req, res) => {
+  const userId = (req as any).userId;
+  const cards = getUserCards(userId);
+  res.json(cards);
+});
+
+// POST create new flashcard
+app.post('/api/cards', authenticate, (req, res) => {
+  const userId = (req as any).userId;
+  const { front, back, hint, tags, deckId } = req.body;
+
+  if (!front || !back) {
+    return res.status(400).json({ error: 'Front and Back are required' });
+  }
+
+  const id = createCard({ front, back, hint, tags, deckId }, userId);
+  res.status(201).json({ id });
+});
+
+// PUT update card
+app.put('/api/cards/:id', authenticate, (req, res) => {
+  const userId = (req as any).userId;
+  const cardId = req.params.id;
+  const success = updateCard(cardId, req.body, userId);
+  if (success) res.json({ success: true });
+  else res.status(404).json({ error: 'Card not found' });
+});
+
+// DELETE card
+app.delete('/api/cards/:id', authenticate, (req, res) => {
+  const userId = (req as any).userId;
+  const cardId = req.params.id;
+  const success = deleteCard(cardId, userId);
+  if (success) res.json({ success: true });
+  else res.status(404).json({ error: 'Card not found' });
+});
 
 const app = express();
 const port = 3000;
