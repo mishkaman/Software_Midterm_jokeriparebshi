@@ -1,71 +1,129 @@
-// backend/src/state.ts
+import db from './db';
+import { Flashcard, BucketMap, AnswerDifficulty } from './logic/flashcards';
+import { PracticeRecord } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Flashcard, BucketMap, AnswerDifficulty } from "./logic/flashcards";
-import { PracticeRecord } from "./types";
+// --------------- Flashcards -----------------
 
-// --- Initial Sample Data ---
-const initialCards: Flashcard[] = [
-  new Flashcard("Capital of France", "Paris", "geo", "Starts with P", ["europe", "capital"]),
-  new Flashcard("2 + 2", "4", "math", "Basic addition", ["math", "easy"]),
-  new Flashcard("Water's chemical formula", "H2O", "science", "Two H's, one O", ["chemistry"]),
-  new Flashcard("Largest planet", "Jupiter", "space", "Gas giant", ["astronomy"]),
-];
-
-// --- In-Memory State ---
-let currentBuckets: BucketMap = new Map();
-currentBuckets.set(0, new Set(initialCards));
-
-let practiceHistory: PracticeRecord[] = [];
-let currentDay: number = 0;
-
-// --- State Accessors & Mutators ---
-export function getBuckets(): BucketMap {
-  return currentBuckets;
+export function getAllCards(): Flashcard[] {
+  const rows = db.prepare('SELECT * FROM flashcards').all();
+  return rows.map(row => ({
+    id: row.id,
+    front: row.front,
+    back: row.back,
+    hint: row.hint,
+    tags: row.tags ? JSON.parse(row.tags) : [],
+    deckId: row.deckId,
+  }));
 }
 
-export function setBuckets(newBuckets: BucketMap): void {
-  currentBuckets = newBuckets;
+export function addCard(card: Flashcard) {
+  db.prepare(`
+    INSERT INTO flashcards (id, front, back, hint, tags, deckId)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    card.id || uuidv4(),
+    card.front,
+    card.back,
+    card.hint || null,
+    JSON.stringify(card.tags || []),
+    card.deckId
+  );
+  db.prepare(`INSERT OR IGNORE INTO buckets (cardId, bucket) VALUES (?, ?)`).run(card.id, 0);
+}
+
+// --------------- Buckets -----------------
+
+export function getBuckets(): BucketMap {
+  const result: BucketMap = new Map();
+  const rows = db.prepare(`
+    SELECT f.*, b.bucket FROM flashcards f
+    JOIN buckets b ON f.id = b.cardId
+  `).all();
+
+  for (const row of rows) {
+    const card: Flashcard = {
+      id: row.id,
+      front: row.front,
+      back: row.back,
+      hint: row.hint,
+      tags: row.tags ? JSON.parse(row.tags) : [],
+      deckId: row.deckId,
+    };
+
+    if (!result.has(row.bucket)) result.set(row.bucket, new Set());
+    result.get(row.bucket)?.add(card);
+  }
+
+  return result;
+}
+
+export function setCardBucket(cardId: string, bucket: number) {
+  db.prepare(`
+    INSERT INTO buckets (cardId, bucket)
+    VALUES (?, ?)
+    ON CONFLICT(cardId) DO UPDATE SET bucket = excluded.bucket
+  `).run(cardId, bucket);
+}
+
+// --------------- History -----------------
+
+export function addHistoryRecord(record: PracticeRecord): void {
+  db.prepare(`
+    INSERT INTO history (cardFront, cardBack, previousBucket, newBucket, difficulty, timestamp)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    record.cardFront,
+    record.cardBack,
+    record.previousBucket,
+    record.newBucket,
+    record.difficulty,
+    record.timestamp.toISOString()
+  );
 }
 
 export function getHistory(): PracticeRecord[] {
-  return practiceHistory;
+  const rows = db.prepare('SELECT * FROM history').all();
+  return rows.map(row => ({
+    cardFront: row.cardFront,
+    cardBack: row.cardBack,
+    previousBucket: row.previousBucket,
+    newBucket: row.newBucket,
+    difficulty: row.difficulty,
+    timestamp: new Date(row.timestamp),
+  }));
 }
 
-export function addHistoryRecord(record: PracticeRecord): void {
-  practiceHistory.push(record);
-}
+// --------------- Day Counter -----------------
 
 export function getCurrentDay(): number {
-  return currentDay;
+  const row = db.prepare(`SELECT value FROM meta WHERE key = 'currentDay'`).get();
+  return row ? parseInt(row.value, 10) : 0;
 }
 
 export function incrementDay(): void {
-  currentDay++;
+  const current = getCurrentDay();
+  const next = current + 1;
+  db.prepare(`INSERT INTO meta (key, value) VALUES ('currentDay', ?) 
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(next.toString());
 }
 
-// --- Helper Functions ---
+// --------------- Card Lookup -----------------
+
 export function findCard(front: string, back: string): Flashcard | undefined {
-  for (const cardSet of currentBuckets.values()) {
-    for (const card of cardSet) {
-      if (card.front === front && card.back === back) {
-        return card;
+  const row = db.prepare(`
+    SELECT * FROM flashcards WHERE front = ? AND back = ?
+  `).get(front, back);
+
+  return row
+    ? {
+        id: row.id,
+        front: row.front,
+        back: row.back,
+        hint: row.hint,
+        tags: row.tags ? JSON.parse(row.tags) : [],
+        deckId: row.deckId,
       }
-    }
-  }
-  return undefined;
+    : undefined;
 }
-
-export function findCardBucket(cardToFind: Flashcard): number | undefined {
-  for (const [bucket, cardSet] of currentBuckets.entries()) {
-    if (cardSet.has(cardToFind)) {
-      return bucket;
-    }
-  }
-  return undefined;
-}
-
-console.log("Initial state loaded: ", {
-  buckets: [...currentBuckets.entries()].map(([k, v]) => [k, [...v]]),
-  day: currentDay,
-  historyLength: practiceHistory.length,
-});
