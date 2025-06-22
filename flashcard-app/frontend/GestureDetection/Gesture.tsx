@@ -37,3 +37,60 @@ const GestureDetector: React.FC<GestureProps> = ({ onGestureDetected, active }) 
       tf.dispose();
     };
   }, []);
+
+  useEffect(() => {
+    if (!active || !modelReady || !webcamRef.current) {
+      cancelAnimationFrame(animationIdRef.current!);
+      animationIdRef.current = undefined;
+      resetDetection();
+      return;
+    }
+
+    let lastTime = 0;
+    const FRAME_INTERVAL = 100; // ms
+
+    const detectHands = async () => {
+      const now = Date.now();
+      if (now - lastTime < FRAME_INTERVAL) {
+        animationIdRef.current = requestAnimationFrame(detectHands);
+        return;
+      }
+      lastTime = now;
+
+      if (webcamRef.current?.video?.readyState !== 4) {
+        animationIdRef.current = requestAnimationFrame(detectHands);
+        return;
+      }
+
+      try {
+        const model = modelRef.current;
+        if (!model) return;
+
+        const hands = await model.estimateHands(webcamRef.current.video);
+
+        if (hands.length > 0) {
+          const gesture = identifyGesture(hands[0]);
+          processGesture(gesture);
+          const thumbPos = getThumbPosition(hands[0].landmarks);
+          setDebugMsg(`Hand detected. Thumb: ${thumbPos}. Gesture: ${gesture ?? 'none'}`);
+        } else {
+          resetDetection();
+          setDebugMsg('No hands detected');
+        }
+      } catch (error) {
+        setDebugMsg(`Detection error: ${error}`);
+        console.error('Hand detection error:', error);
+      }
+
+      animationIdRef.current = requestAnimationFrame(detectHands);
+    };
+
+    detectHands();
+
+    return () => {
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+    };
+  }, [active, modelReady]);
+
+
+}
