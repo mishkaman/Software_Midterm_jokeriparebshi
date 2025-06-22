@@ -1,10 +1,13 @@
 {
   "dependencies": {
+    "@tensorflow-models/handpose": "^0.1.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.0.0",
     "jsonwebtoken": "^9.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-webcam": "^7.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

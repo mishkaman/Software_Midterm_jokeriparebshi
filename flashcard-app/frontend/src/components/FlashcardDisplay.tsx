@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./FlashcardDisplay.css";
 import { flashcards as cardsData } from "../data/Cards";
-import GestureDetector, { Gesture } from "../GestureDetection/Gesture";
+import GestureDetector, { Gesture } from "./GestureDetection/Gesture";
 
 type DifficultyRating = "easy" | "hard" | "wrong";
 
@@ -190,7 +190,7 @@ const FlashcardLearner: React.FC = () => {
                 {debugInfo && <div className="debug-info">{debugInfo}</div>}
 
                 <GestureDetector
-                  isActive={gestureEnabled}
+                  active={gestureEnabled}
                   onGestureDetected={onGestureDetected}
                 />
 

@@ -81,3 +81,43 @@ document.addEventListener(
 );
 
 console.log("AI Flashcard Creator: Interaction listeners attached.");
+
+// Add progress bar to body
+const style = document.createElement("style");
+style.textContent = `
+  .ai-flashcard-progress-container {
+    width: 100%;
+    height: 6px;
+    background-color: #ddd;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+  }
+  .ai-flashcard-progress-fill {
+    height: 100%;
+    background-color: #f51aac;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+`;
+document.head.appendChild(style);
+
+const progressContainer = document.createElement("div");
+progressContainer.className = "ai-flashcard-progress-container";
+const progressFill = document.createElement("div");
+progressFill.className = "ai-flashcard-progress-fill";
+progressContainer.appendChild(progressFill);
+document.body.appendChild(progressContainer);
+
+// Example usage for progress update
+let currentCard = 0;
+let totalCards = 10; // You should dynamically get this from your app
+
+function updateProgressBar(cardIndex, total) {
+  const percent = Math.min((cardIndex / total) * 100, 100);
+  progressFill.style.width = `${percent}%`;
+}
+
+// Update it when needed
+updateProgressBar(currentCard, totalCards);
