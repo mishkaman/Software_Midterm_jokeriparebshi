@@ -232,6 +232,6 @@ const GestureDetector: React.FC<GestureProps> = ({ onGestureDetected, active }) 
   );
 };
 
-export default GestureDetector;
+export default Gesture;
 
 
