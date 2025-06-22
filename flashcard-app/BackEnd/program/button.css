@@ -1,0 +1,14 @@
+/* button.css */
+#ai-flashcard-button {
+    position: fixed;
+    z-index: 2147483647;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-family: "Fira Sans", sans-serif;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: none;
+    pointer-events: auto;
+}
