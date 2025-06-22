@@ -1,0 +1,49 @@
+import { Flashcard } from "../src/data/logic";
+
+const STORAGE_KEY = 'flashcardData';
+
+// Generic utility to load data from localStorage
+const fetchFromStorage = async <T>(key: string, fallback: T): Promise<T> => {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (err) {
+    console.error(`Failed to retrieve ${key}:`, err);
+    return fallback;
+  }
+};
+
+// Generic utility to save data to localStorage
+const saveToStorage = async <T>(key: string, value: T): Promise<void> => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(value));
+    } else {
+      throw new Error("localStorage is not available in this environment");
+    }
+  } catch (err) {
+    console.error(`Failed to store ${key}:`, err);
+  }
+};
+
+// Flashcard-specific API
+export const loadFlashcards = async (): Promise<Flashcard[]> => {
+  return await fetchFromStorage<Flashcard[]>(STORAGE_KEY, []);
+};
+
+export const storeFlashcards = async (cards: Flashcard[]): Promise<void> => {
+  await saveToStorage(STORAGE_KEY, cards);
+};
+
+export const modifyFlashcard = async (updated: Flashcard): Promise<void> => {
+  const allCards = await loadFlashcards();
+  const index = allCards.findIndex(card => card.id === updated.id);
+
+  if (index !== -1) {
+    allCards[index] = { ...updated };
+    await storeFlashcards(allCards);
+    console.log("Updated flashcard:", updated);
+  } else {
+    console.warn("Flashcard not found for update:", updated.id);
+  }
+};
