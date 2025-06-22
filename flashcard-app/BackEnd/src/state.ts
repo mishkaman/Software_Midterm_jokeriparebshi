@@ -3,6 +3,7 @@
 import { Flashcard, BucketMap, AnswerDifficulty } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
 
+
 // --- Initial Sample Data ---
 const initialCards: Flashcard[] = [
   new Flashcard("Capital of France", "Paris", "geo", "Starts with P", ["europe", "capital"]),
