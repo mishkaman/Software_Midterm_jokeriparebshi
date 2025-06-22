@@ -92,5 +92,87 @@ const GestureDetector: React.FC<GestureProps> = ({ onGestureDetected, active }) 
     };
   }, [active, modelReady]);
 
+    const getThumbPosition = (landmarks: number[][]): string => {
+    const wristY = landmarks[0][1];
+    const thumbTipY = landmarks[4][1];
+    const indexMcpX = landmarks[5][0];
+    const thumbTipX = landmarks[4][0];
+
+    if (thumbTipY < wristY && Math.abs(thumbTipX - indexMcpX) > 30) return 'UP';
+    if (thumbTipY > wristY && Math.abs(thumbTipX - indexMcpX) > 30) return 'DOWN';
+    return 'NEUTRAL';
+  };
+
+  const areMostFingersExtended = (landmarks: number[][]): boolean => {
+    const tips = [8, 12, 16, 20];
+    const mcps = [5, 9, 13, 17];
+    let extendedCount = 0;
+
+    tips.forEach((tip, i) => {
+      if (landmarks[tip][1] < landmarks[mcps[i]][1]) extendedCount++;
+    });
+
+    return extendedCount >= 3;
+  };
+
+  const identifyGesture = (prediction: handpose.AnnotatedPrediction): Gesture => {
+    const landmarks = prediction.landmarks;
+
+    if (getThumbPosition(landmarks) === 'UP' && !areMostFingersExtended(landmarks)) {
+      return 'thumbsUp';
+    }
+    if (getThumbPosition(landmarks) === 'DOWN' && !areMostFingersExtended(landmarks)) {
+      return 'thumbsDown';
+    }
+    if (areMostFingersExtended(landmarks)) {
+      return 'flatHand';
+    }
+    return null;
+  };
+
+  const [currentGesture, setCurrentGesture] = useState<Gesture>(null);
+  const [holding, setHolding] = useState(false);
+  const holdStartRef = useRef<number>(0);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const gestureTriggeredRef = useRef(false);
+
+  const resetDetection = () => {
+    setCurrentGesture(null);
+    setHolding(false);
+    setHoldProgress(0);
+    holdStartRef.current = 0;
+    gestureTriggeredRef.current = false;
+  };
+
+  const processGesture = (gesture: Gesture) => {
+    if (!active) return;
+
+    if (gesture !== currentGesture || gesture === null) {
+      setCurrentGesture(gesture);
+      setHolding(false);
+      setHoldProgress(0);
+      holdStartRef.current = 0;
+      return;
+    }
+
+    if (gestureTriggeredRef.current) return;
+
+    if (!holding) {
+      setHolding(true);
+      holdStartRef.current = Date.now();
+    }
+
+    const elapsed = Date.now() - holdStartRef.current;
+    const progressRatio = Math.min(elapsed / 3000, 1);
+    setHoldProgress(progressRatio);
+
+    if (elapsed >= 3000) {
+      gestureTriggeredRef.current = true;
+      setDebugMsg(`Gesture "${gesture}" recognized - triggering callback`);
+      onGestureDetected && setTimeout(() => onGestureDetected(gesture), 0);
+    }
+  };
+  
+  
 
 }
