@@ -173,6 +173,65 @@ const GestureDetector: React.FC<GestureProps> = ({ onGestureDetected, active }) 
     }
   };
   
-  
+    const gestureLabel = (gesture: Gesture) => {
+    switch (gesture) {
+      case 'thumbsUp':
+        return '👍 Easy';
+      case 'thumbsDown':
+        return '👎 Wrong';
+      case 'flatHand':
+        return '✋ Hard';
+      default:
+        return 'Waiting for gesture...';
+    }
+  };
 
-}
+  return (
+    <div className="gesture-detector-container">
+      {!modelReady ? (
+        <div className="loading-wrapper">
+          <div className="spinner"></div>
+          <p>Loading handpose model...</p>
+        </div>
+      ) : (
+        <>
+          <Webcam
+            ref={webcamRef}
+            className="gesture-webcam"
+            videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
+          />
+          <div className="gesture-feedback">
+            <div className={`gesture-label ${currentGesture ? 'active' : ''}`}>
+              {currentGesture ? (
+                <>
+                  <div className="gesture-name">{gestureLabel(currentGesture)}</div>
+                  {holding && (
+                    <div className="hold-countdown">
+                      <div className="countdown-number">{Math.ceil(3 - holdProgress * 3)}</div>
+                      Hold gesture to confirm
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="waiting-message">Waiting for gesture...</div>
+              )}
+            </div>
+            {holding && (
+              <div className="hold-progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${holdProgress * 100}%` }}
+                />
+              </div>
+            )}
+            <div className="debug-text">{debugMsg}</div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default GestureDetector;
+
+
