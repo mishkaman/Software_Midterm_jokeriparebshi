@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./FlashcardDisplay.css";
 import { flashcards as cardsData } from "../data/Cards";
-import GestureDetector, { Gesture } from "../GestureDetector/GestureDetector";
+import GestureDetector, { Gesture } from "../GestureDetection/Gesture";
 
 type DifficultyRating = "easy" | "hard" | "wrong";
 
