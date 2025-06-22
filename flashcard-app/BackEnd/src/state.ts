@@ -78,7 +78,7 @@ export function addHistoryRecord(record: PracticeRecord): void {
     record.previousBucket,
     record.newBucket,
     record.difficulty,
-    record.timestamp.toISOString()
+    record.timestamp.toString()
   );
 }
 

@@ -5,8 +5,62 @@
  * as described in the problem set handout.
  */
 
+import db from "src/db";
 import { PracticeRecord, ProgressStats } from "../types/index";
 import { Flashcard, AnswerDifficulty, BucketMap } from "./flashcards";
+// Public: register
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const userId = await registerUser(username, password);
+    res.status(201).json({ userId });
+  } catch (err) {
+    res.status(400).json({ error: 'User already exists' });
+  }
+});
+
+// Public: login
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const token = await loginUser(username, password);
+  if (token) {
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
+export function getAllCards(userId: string): Flashcard[] {
+  const rows = db.prepare('SELECT * FROM flashcards WHERE userId = ?').all(userId);
+  return rows.map(row => ({
+    id: row.id,
+    front: row.front,
+    back: row.back,
+    hint: row.hint,
+    tags: row.tags ? JSON.parse(row.tags) : [],
+    deckId: row.deckId,
+  }));
+}
+export function addCard(card: Flashcard, userId: string) {
+  db.prepare(`
+    INSERT INTO flashcards (id, front, back, hint, tags, deckId, userId)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    card.id,
+    card.front,
+    card.back,
+    card.hint || null,
+    JSON.stringify(card.tags || []),
+    card.deckId,
+    userId
+  );
+
+  db.prepare(`
+    INSERT OR IGNORE INTO buckets (cardId, bucket, userId)
+    VALUES (?, ?, ?)
+  `).run(card.id, 0, userId);
+}
+
 
 export function toBucketSets(buckets: BucketMap): Array<Set<Flashcard>> {
   // Find the maximum bucket number to create an array of the right size
@@ -42,6 +96,8 @@ export function getBucketRange(
   if (nonEmptyBuckets.length === 0) {
     return undefined;
   }
+
+  
 
   // Find the minimum and maximum bucket indices
   const minBucket = Math.min(...nonEmptyBuckets.map(({ index }) => index));

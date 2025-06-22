@@ -29,6 +29,18 @@ import {
 } from "./state";
 
 import { PracticeRecord } from "./types";
+import { authenticate } from '../middleware/authenticate'; // path to the middleware
+import { getAllCards, addCard } from '../src/logic'; // your logic
+import bodyParser from 'body-parser';
+import express from 'express';
+import { registerUser, loginUser } from './services/userService';
+import bodyParser from 'body-parser';
+
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.json());
+
 
 // --- Setup ---
 const app = express();
