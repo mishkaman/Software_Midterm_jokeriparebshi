@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Card Creator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-wrapper">
+    <header>
+      <h1>Study Card Creator</h1>
+    </header>
+    
+    <section class="card-builder">
+      <div class="input-group">
+        <label for="question-side">Question:</label>
+        <textarea id="question-side" placeholder="What do you want to remember?"></textarea>
+      </div>
+      
+      <div class="input-group">
+        <label for="answer-side">Answer:</label>
+        <textarea id="answer-side" placeholder="The answer or explanation"></textarea>
+      </div>
+      
+      <div class="input-group">
+        <label for="memory-hint">Memory Aid (optional):</label>
+        <textarea id="memory-hint" placeholder="Add a helpful clue or mnemonic"></textarea>
+      </div>
+      
+      <div class="input-group">
+        <label for="category-tags">Categories (use semicolons to separate):</label>
+        <textarea id="category-tags" placeholder="math; science; history"></textarea>
+      </div>
+      
+      <div class="action-buttons">
+        <button id="create-card" class="primary-btn">Create Card</button>
+        <button id="reset-form" class="secondary-btn">Reset Form</button>
+      </div>
+    </section>
+    
+    <div class="feedback-area" id="feedback-display"></div>
+    
+    <section class="card-history">
+      <h2>Previously Created Cards</h2>
+      <div id="card-collection"></div>
+    </section>
+  </main>
+  
+  <script src="app-logic.js"></script>
+</body>
+</html>
