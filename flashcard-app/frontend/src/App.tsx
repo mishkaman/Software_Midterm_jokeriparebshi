@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import PracticeView from './components/PracticeView';
 import Dashboard from './components/Dashboard'; // You'll create this next
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -17,7 +19,10 @@ function App() {
             <Route path="/" element={<PracticeView />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
+          
         </div>
+        <PracticeView />
+      <ToastContainer position="top-center" autoClose={3000} />
       </div>
     </Router>
   );

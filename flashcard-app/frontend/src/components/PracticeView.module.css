@@ -402,3 +402,29 @@
     color: #6b7280;
   }
 }
+
+.searchContainer {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.searchInput {
+  padding: 0.5rem;
+  width: 80%;
+  max-width: 500px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.streakDisplay {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #e25822;
+  margin-left: auto;
+}
+.streakCounter {
+  font-weight: bold;
+  color: #ff6600;
+  margin-top: 0.5rem;
+}

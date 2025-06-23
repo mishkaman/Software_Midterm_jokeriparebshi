@@ -69,5 +69,34 @@ export const toggleBookmark = async (card: Flashcard): Promise<void> => {
     bookmarks.push({ ...card, bookmarked: true }); // ✅ this is now valid
     await saveBookmarks(bookmarks);
   }
+
+
+
 };
 
+ // 🔥 Streak tracking keys
+const STREAK_KEY = 'practiceStreak';
+const LAST_PRACTICE_DATE_KEY = 'lastPracticeDate';
+
+// 🚀 Get the current streak value
+export const getPracticeStreak = (): number => {
+  const streak = localStorage.getItem(STREAK_KEY);
+  return streak ? parseInt(streak, 10) : 0;
+};
+
+
+// 🔁 Update streak if today wasn't already counted
+export const updatePracticeStreak = (): number => {
+  const today = new Date().toDateString();
+  const lastDate = localStorage.getItem('lastPracticeDate');
+  const rawStreak = localStorage.getItem('practiceStreak');
+  let streak = rawStreak ? parseInt(rawStreak) : 0;
+
+  if (lastDate !== today) {
+    streak += 1;
+    localStorage.setItem('practiceStreak', streak.toString());
+    localStorage.setItem('lastPracticeDate', today);
+  }
+
+  return streak;
+};

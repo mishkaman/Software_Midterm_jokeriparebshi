@@ -8,6 +8,15 @@ import { loadFlashcards } from '../../utils/storage';
 import { filterFlashcardsByTags } from '../../utils/tagFilter';
 import TagFilter from './tagFilter';
 import GestureDetector, { Gesture } from './GestureDetection/Gesture';
+import { updatePracticeStreak, getPracticeStreak } from '../../utils/storage';
+import { toast } from 'react-toastify';
+
+
+const [streak, setStreak] = useState<number>(0);
+
+useEffect(() => {
+  setStreak(getPracticeStreak());
+}, []);
 
 const PracticeView: React.FC = () => {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
@@ -21,10 +30,8 @@ const PracticeView: React.FC = () => {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [gestureEnabled, setGestureEnabled] = useState(false);
   const [lastDifficulty, setLastDifficulty] = useState<AnswerDifficulty | null>(null);
-const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
-
-
-
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const loadPracticeCards = async () => {
     setIsLoading(true);
@@ -36,7 +43,15 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
       const uniqueTags = Array.from(new Set(allCards.flatMap(card => card.tags || [])));
       setAvailableTags(uniqueTags);
 
-      const filtered = filterFlashcardsByTags(allCards, selectedTags);
+      const filtered = filterFlashcardsByTags(allCards, selectedTags)
+        .filter(card => {
+          const inSearch =
+            card.front.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            card.back.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (card.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+          const inBookmarks = !showBookmarkedOnly || localStorage.getItem('bookmarkedFlashcards')?.includes(card.id);
+          return inSearch && inBookmarks;
+        });
 
       const transformedCards: Flashcard[] = filtered.map(card => ({
         id: card.front,
@@ -44,7 +59,7 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
         back: card.back,
         hint: card.hint,
         tags: [...(card.tags || [])],
-        deckId: card.deckId
+        deckId: card.deckId || ""
       }));
 
       setPracticeCards(transformedCards);
@@ -52,6 +67,18 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
       if (transformedCards.length === 0) {
         setSessionFinished(true);
       }
+      const newStreak = updatePracticeStreak();
+setStreak(newStreak);
+
+if (newStreak === 1) {
+  toast('✅  First streak started! Keep going!');
+} else if (newStreak === 5) {
+  toast('🎉 5-day streak! You’re on fire!');
+} else if (newStreak === 10) {
+  toast('🏆 10-day streak! Champion mode!');
+} else {
+  toast(`🔥Streak: ${newStreak} days`);
+}
     } catch (err) {
       setError('Failed to load practice cards. Please try again.');
     } finally {
@@ -61,7 +88,7 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
 
   useEffect(() => {
     loadPracticeCards();
-  }, [selectedTags]);
+  }, [selectedTags, searchTerm, showBookmarkedOnly]);
 
   useEffect(() => {
     if (showBack) {
@@ -82,35 +109,40 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
     setShowBack(true);
   };
 
-  const handleAnswer = async (difficulty: AnswerDifficulty) => {
-    if (currentCardIndex >= practiceCards.length) return;
+ const handleAnswer = async (difficulty: AnswerDifficulty) => {
+  if (currentCardIndex >= practiceCards.length) return;
 
-    const currentCard = practiceCards[currentCardIndex];
+  const currentCard = practiceCards[currentCardIndex];
 
-    try {
-      await submitAnswer(currentCard.front, currentCard.back, difficulty);
-      const nextIndex = currentCardIndex + 1;
-      const reviewRecord = {
-        cardId: currentCard.front,
-        date: new Date().toISOString(),
-        difficulty
-      };
+  try {
+    await submitAnswer(currentCard.front, currentCard.back, difficulty);
+    const nextIndex = currentCardIndex + 1;
+
+    const reviewRecord = {
+      cardId: currentCard.front,
+      date: new Date().toISOString(),
+      difficulty,
+    };
 
     const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
     existing.push(reviewRecord);
     localStorage.setItem('reviews', JSON.stringify(existing));
 
+    if (nextIndex < practiceCards.length) {
+  setCurrentCardIndex(nextIndex);
+  setShowBack(false);
+} else {
+  setSessionFinished(true);
+const newStreak = updatePracticeStreak();
+setStreak(newStreak);
 
-      if (nextIndex < practiceCards.length) {
-        setCurrentCardIndex(nextIndex);
-        setShowBack(false);
-      } else {
-        setSessionFinished(true);
-      }
-    } catch (err) {
-      setError('Failed to submit your answer. Please try again.');
-    }
-  };
+}
+
+  } catch (err) {
+    setError('Failed to submit your answer. Please try again.');
+  }
+};
+
 
   const handleNextDay = async () => {
     try {
@@ -187,12 +219,25 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
           <span className={styles.progressIndicator}>Card {currentCardIndex + 1} of {practiceCards.length}</span>
         </div>
       </div>
+    <div className={styles.streakDisplay}>
+        🔥 Current Streak: <strong>{streak}</strong> day{streak === 1 ? '' : 's'}
+    </div>
 
       <TagFilter
         availableTags={availableTags}
         selectedTags={selectedTags}
         onTagChange={handleTagChange}
       />
+
+      <div className={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="Search cards..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
 
       {renderProgressBar()}
 
@@ -236,18 +281,18 @@ const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
               Wrong
             </button>
           </>
-          
         )}
+
         <div className={styles.toggleContainer}>
-  <label>
-    <input
-      type="checkbox"
-      checked={showBookmarkedOnly}
-      onChange={() => setShowBookmarkedOnly(prev => !prev)}
-    />
-    Practice Only Bookmarked Cards
-  </label>
-</div>
+          <label>
+            <input
+              type="checkbox"
+              checked={showBookmarkedOnly}
+              onChange={() => setShowBookmarkedOnly(prev => !prev)}
+            />
+            Practice Only Bookmarked Cards
+          </label>
+        </div>
       </div>
     </div>
   );
