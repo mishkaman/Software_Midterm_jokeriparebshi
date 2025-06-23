@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Flashcard } from '../types'; // Frontend type definition
+import React, { useState, useEffect, useCallback } from 'react';
+import { Flashcard } from '../types';
 import { fetchPracticeCards, submitAnswer, advanceDay } from '../services/api';
 import FlashcardDisplay from './FlashcardDisplay';
 import { AnswerDifficulty } from '../../../BackEnd/src/logic/flashcards';
-import styles from './PracticeView.module.css'; // Import the CSS module
+import styles from './PracticeView.module.css';
+import { loadFlashcards } from '../../utils/storage';
+import { filterFlashcardsByTags } from '../../utils/tagFilter';
+import TagFilter from './tagFilter';
+import GestureDetector, { Gesture } from './GestureDetection/Gesture';
 
 const PracticeView: React.FC = () => {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
@@ -13,6 +17,10 @@ const PracticeView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [day, setDay] = useState(0);
   const [sessionFinished, setSessionFinished] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [gestureEnabled, setGestureEnabled] = useState(false);
+  const [lastDifficulty, setLastDifficulty] = useState<AnswerDifficulty | null>(null);
 
   const loadPracticeCards = async () => {
     setIsLoading(true);
@@ -20,19 +28,22 @@ const PracticeView: React.FC = () => {
     setSessionFinished(false);
 
     try {
-      const { cards, day: newDay } = await fetchPracticeCards();
-      // Transform backend Flashcard type to frontend Flashcard type
-      const transformedCards: Flashcard[] = cards.map(card => ({
-        id: card.front, // Using front as a temporary ID or generate UUID if needed
+      const allCards = await loadFlashcards();
+      const uniqueTags = Array.from(new Set(allCards.flatMap(card => card.tags || [])));
+      setAvailableTags(uniqueTags);
+
+      const filtered = filterFlashcardsByTags(allCards, selectedTags);
+
+      const transformedCards: Flashcard[] = filtered.map(card => ({
+        id: card.front,
         front: card.front,
         back: card.back,
         hint: card.hint,
-        tags: [...card.tags],
+        tags: [...(card.tags || [])],
         deckId: card.deckId
       }));
 
       setPracticeCards(transformedCards);
-      setDay(newDay);
 
       if (transformedCards.length === 0) {
         setSessionFinished(true);
@@ -46,7 +57,22 @@ const PracticeView: React.FC = () => {
 
   useEffect(() => {
     loadPracticeCards();
-  }, []);
+  }, [selectedTags]);
+
+  useEffect(() => {
+    if (showBack) {
+      setGestureEnabled(true);
+      setLastDifficulty(null);
+    } else {
+      setGestureEnabled(false);
+    }
+  }, [showBack]);
+
+  const handleTagChange = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
 
   const handleShowBack = () => {
     setShowBack(true);
@@ -80,6 +106,38 @@ const PracticeView: React.FC = () => {
     } catch (err) {
       setError('Failed to advance to next day. Please try again.');
     }
+  };
+
+  const onGestureDetected = useCallback((gesture: Gesture) => {
+    if (!gestureEnabled || lastDifficulty !== null) return;
+
+    let difficulty: AnswerDifficulty | null = null;
+    switch (gesture) {
+      case 'thumbsUp':
+        difficulty = AnswerDifficulty.Easy;
+        break;
+      case 'flatHand':
+        difficulty = AnswerDifficulty.Hard;
+        break;
+      case 'thumbsDown':
+        difficulty = AnswerDifficulty.Wrong;
+        break;
+    }
+
+    if (difficulty) {
+      setLastDifficulty(difficulty);
+      setGestureEnabled(false);
+      setTimeout(() => handleAnswer(difficulty!), 1000);
+    }
+  }, [gestureEnabled, lastDifficulty, handleAnswer]);
+
+  const renderProgressBar = () => {
+    const percent = (currentCardIndex / practiceCards.length) * 100;
+    return (
+      <div className={styles.progressBarWrapper}>
+        <div className={styles.progressBar} style={{ width: `${percent}%` }}></div>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -116,9 +174,24 @@ const PracticeView: React.FC = () => {
         </div>
       </div>
 
+      <TagFilter
+        availableTags={availableTags}
+        selectedTags={selectedTags}
+        onTagChange={handleTagChange}
+      />
+
+      {renderProgressBar()}
+
       <div className={styles.flashcardContainer}>
         <FlashcardDisplay card={currentCard} showBack={showBack} />
       </div>
+
+      {showBack && (
+        <>
+          <p className={styles.gestureText}>Rate using gestures (👍 Easy, ✋ Hard, 👎 Wrong)</p>
+          <GestureDetector active={gestureEnabled} onGestureDetected={onGestureDetected} />
+        </>
+      )}
 
       <div className={styles.buttonsContainer}>
         {!showBack ? (
