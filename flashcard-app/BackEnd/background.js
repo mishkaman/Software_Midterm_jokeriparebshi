@@ -52,3 +52,47 @@ chrome.action.onClicked.addListener(() => {
     url: chrome.runtime.getURL('practice.html'),
   });
 });
+
+// Ask for permission once
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.notifications.create({
+    type: 'basic',
+    iconUrl: 'icons/icon128.png',
+    title: 'Daily Review Reminder',
+    message: 'Would you like to get daily flashcard review reminders?',
+    buttons: [{ title: 'Yes, remind me!' }],
+    priority: 1,
+    requireInteraction: true
+  });
+});
+
+// Handle user clicking the reminder button
+chrome.notifications.onButtonClicked.addListener((notifId, buttonIndex) => {
+  if (buttonIndex === 0) {
+    chrome.alarms.create('dailyReviewReminder', {
+      when: Date.now() + 1000, // Start in 1 sec
+      periodInMinutes: 1440    // 24 hours
+    });
+  }
+});
+
+// Show daily notification
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'dailyReviewReminder') {
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: 'Flashcard Time!',
+      message: 'Time for your daily flashcard review.',
+      priority: 1
+    });
+  }
+});
+
+// Open practice page on notification click
+chrome.notifications.onClicked.addListener(() => {
+  chrome.tabs.create({
+    url: chrome.runtime.getURL('practice.html'),
+  });
+});
+
