@@ -100,3 +100,27 @@ export const updatePracticeStreak = (): number => {
 
   return streak;
 };
+// Save how many cards were reviewed today (keyed by date)
+const DAILY_PROGRESS_KEY = 'dailyReviewProgress';
+
+export const incrementDailyReviewCount = () => {
+  const today = new Date().toISOString().split('T')[0];
+  const data = JSON.parse(localStorage.getItem(DAILY_PROGRESS_KEY) || '{}');
+
+  data[today] = (data[today] || 0) + 1;
+
+  localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify(data));
+};
+
+export const getTodayReviewCount = (): number => {
+  const today = new Date().toISOString().split('T')[0];
+  const data = JSON.parse(localStorage.getItem(DAILY_PROGRESS_KEY) || '{}');
+  return data[today] || 0;
+};
+
+export const clearTodayReviewCount = () => {
+  const today = new Date().toISOString().split('T')[0];
+  const data = JSON.parse(localStorage.getItem(DAILY_PROGRESS_KEY) || '{}');
+  delete data[today];
+  localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify(data));
+};

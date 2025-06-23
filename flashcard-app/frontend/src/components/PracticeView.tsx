@@ -10,7 +10,17 @@ import TagFilter from './tagFilter';
 import GestureDetector, { Gesture } from './GestureDetection/Gesture';
 import { updatePracticeStreak, getPracticeStreak } from '../../utils/storage';
 import { toast } from 'react-toastify';
+import {
+  incrementDailyReviewCount,
+  getTodayReviewCount,
+  clearTodayReviewCount
+} from '../../utils/storage';
 
+const [dailyCount, setDailyCount] = useState<number>(0);
+const DAILY_GOAL = 10; // you can make this dynamic later
+useEffect(() => {
+  setDailyCount(getTodayReviewCount());
+}, []);
 
 const [streak, setStreak] = useState<number>(0);
 
@@ -137,6 +147,11 @@ const newStreak = updatePracticeStreak();
 setStreak(newStreak);
 
 }
+await submitAnswer(currentCard.front, currentCard.back, difficulty);
+
+// Track daily count
+incrementDailyReviewCount();
+setDailyCount(getTodayReviewCount());
 
   } catch (err) {
     setError('Failed to submit your answer. Please try again.');
@@ -144,15 +159,22 @@ setStreak(newStreak);
 };
 
 
-  const handleNextDay = async () => {
-    try {
-      await advanceDay();
-      await loadPracticeCards();
-      setCurrentCardIndex(0);
-    } catch (err) {
-      setError('Failed to advance to next day. Please try again.');
+const handleNextDay = async () => {
+  try {
+    if (dailyCount >= DAILY_GOAL) {
+      toast.success('🎉 You reached your daily goal!');
     }
-  };
+
+    await advanceDay();
+    await loadPracticeCards();
+    setCurrentCardIndex(0);
+    clearTodayReviewCount();
+    setDailyCount(0);
+  } catch (err) {
+    setError('Failed to advance to next day. Please try again.');
+  }
+};
+
 
   const onGestureDetected = useCallback((gesture: Gesture) => {
     if (!gestureEnabled || lastDifficulty !== null) return;
@@ -176,6 +198,17 @@ setStreak(newStreak);
       setTimeout(() => handleAnswer(difficulty!), 1000);
     }
   }, [gestureEnabled, lastDifficulty, handleAnswer]);
+  <div className={styles.goalProgressBar}>
+  <p className={styles.goalText}>
+    🎯 Daily Goal: {dailyCount}/{DAILY_GOAL} cards reviewed
+  </p>
+  <div className={styles.goalBarWrapper}>
+    <div
+      className={styles.goalBar}
+      style={{ width: `${(dailyCount / DAILY_GOAL) * 100}%` }}
+    />
+  </div>
+</div>
 
   const renderProgressBar = () => {
     const percent = (currentCardIndex / practiceCards.length) * 100;

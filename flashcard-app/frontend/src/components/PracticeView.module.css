@@ -428,3 +428,26 @@
   color: #ff6600;
   margin-top: 0.5rem;
 }
+.goalProgressBar {
+  margin: 1rem auto;
+  width: 80%;
+  text-align: center;
+}
+
+.goalText {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.goalBarWrapper {
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.goalBar {
+  height: 10px;
+  background-color: #4caf50;
+  transition: width 0.3s ease;
+}
