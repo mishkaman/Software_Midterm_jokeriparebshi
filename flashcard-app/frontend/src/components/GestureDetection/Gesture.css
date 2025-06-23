@@ -1,0 +1,78 @@
+/* Container for the gesture detection UI */
+.gesture-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.5rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Webcam feed styling */
+.gesture-video {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px #f51aac33;
+}
+
+/* Feedback panel */
+.gesture-info-box {
+  width: 100%;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Active gesture highlight */
+.gesture-status-label {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #f51aac;
+  margin-bottom: 0.5rem;
+}
+
+.gesture-status-label.idle {
+  color: #888;
+}
+
+.gesture-tip {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+/* Hold progress visual */
+.hold-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 4px;
+  background-color: #e2e2e2;
+  overflow: hidden;
+  margin-top: 0.8rem;
+}
+
+.hold-fill {
+  height: 100%;
+  background-color: #4caf50;
+  width: 0%;
+  transition: width 0.15s ease-in-out;
+  animation: pulseBar 1s infinite;
+}
+
+@keyframes pulseBar {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
