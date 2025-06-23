@@ -34,7 +34,11 @@ export interface Flashcard {
     hint?: string;         // Optional property
     tags: string[];        // Mutable property
     deckId: string;        // Required property
+      bookmarked?: boolean;
+
   }
+
+
 
 // --- Re-export Core Types ---
 export type AnswerDifficulty = CoreDifficulty;

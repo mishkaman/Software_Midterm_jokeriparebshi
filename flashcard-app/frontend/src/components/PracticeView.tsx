@@ -21,6 +21,10 @@ const PracticeView: React.FC = () => {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [gestureEnabled, setGestureEnabled] = useState(false);
   const [lastDifficulty, setLastDifficulty] = useState<AnswerDifficulty | null>(null);
+const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+
+
+
 
   const loadPracticeCards = async () => {
     setIsLoading(true);
@@ -232,7 +236,18 @@ const PracticeView: React.FC = () => {
               Wrong
             </button>
           </>
+          
         )}
+        <div className={styles.toggleContainer}>
+  <label>
+    <input
+      type="checkbox"
+      checked={showBookmarkedOnly}
+      onChange={() => setShowBookmarkedOnly(prev => !prev)}
+    />
+    Practice Only Bookmarked Cards
+  </label>
+</div>
       </div>
     </div>
   );

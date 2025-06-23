@@ -1,6 +1,7 @@
-import { Flashcard } from "../src/data/logic";
+import { Flashcard } from '../src/types';
 
 const STORAGE_KEY = 'flashcardData';
+const BOOKMARK_KEY = 'bookmarkedFlashcards';
 
 // Generic utility to load data from localStorage
 const fetchFromStorage = async <T>(key: string, fallback: T): Promise<T> => {
@@ -47,3 +48,26 @@ export const modifyFlashcard = async (updated: Flashcard): Promise<void> => {
     console.warn("Flashcard not found for update:", updated.id);
   }
 };
+
+// Bookmark-specific API
+export const loadBookmarks = async (): Promise<Flashcard[]> => {
+  return await fetchFromStorage<Flashcard[]>(BOOKMARK_KEY, []);
+};
+
+export const saveBookmarks = async (bookmarks: Flashcard[]): Promise<void> => {
+  await saveToStorage(BOOKMARK_KEY, bookmarks);
+};
+
+export const toggleBookmark = async (card: Flashcard): Promise<void> => {
+  const bookmarks = await loadBookmarks();
+  const exists = bookmarks.find(b => b.id === card.id);
+
+  if (exists) {
+    const updated = bookmarks.filter(b => b.id !== card.id);
+    await saveBookmarks(updated);
+  } else {
+    bookmarks.push({ ...card, bookmarked: true }); // ✅ this is now valid
+    await saveBookmarks(bookmarks);
+  }
+};
+
