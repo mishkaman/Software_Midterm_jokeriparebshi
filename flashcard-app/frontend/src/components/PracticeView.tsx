@@ -86,6 +86,16 @@ const PracticeView: React.FC = () => {
     try {
       await submitAnswer(currentCard.front, currentCard.back, difficulty);
       const nextIndex = currentCardIndex + 1;
+      const reviewRecord = {
+        cardId: currentCard.front,
+        date: new Date().toISOString(),
+        difficulty
+      };
+
+    const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
+    existing.push(reviewRecord);
+    localStorage.setItem('reviews', JSON.stringify(existing));
+
 
       if (nextIndex < practiceCards.length) {
         setCurrentCardIndex(nextIndex);

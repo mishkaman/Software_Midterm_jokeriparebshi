@@ -1,0 +1,22 @@
+/* src/components/Dashboard.module.css */
+.dashboardContainer {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  margin: 2rem auto;
+  max-width: 600px;
+  font-family: sans-serif;
+}
+.dashboardContainer h2 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+.dashboardContainer ul {
+  list-style: none;
+  padding: 0;
+}
+.dashboardContainer li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
