@@ -1,48 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import { Flashcard } from '../types';
 import { loadFlashcards } from '../../utils/storage';
+import styles from './ReviewHistory.module.css';
 
 interface ReviewEntry {
   cardId: string;
   date: string;
-  difficulty: string;
+  difficulty: 'Easy' | 'Hard' | 'Wrong';
 }
 
 const ReviewHistory: React.FC = () => {
   const [history, setHistory] = useState<ReviewEntry[]>([]);
   const [cards, setCards] = useState<Flashcard[]>([]);
+  const [filter, setFilter] = useState<string>('All');
 
   useEffect(() => {
     const fetchData = async () => {
-      const reviews: ReviewEntry[] = JSON.parse(localStorage.getItem('reviews') || '[]');
-      const allCards = await loadFlashcards();
-      setHistory(reviews.reverse().slice(0, 10)); // Show 10 most recent
-      setCards(allCards);
+      const raw: ReviewEntry[] = JSON.parse(localStorage.getItem('reviews') || '[]');
+      const sorted = raw.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setHistory(sorted.slice(0, 50)); // Limit to 50 recent
+      setCards(await loadFlashcards());
     };
 
     fetchData();
   }, []);
 
-  const getCardContent = (id: string) => {
+  const getCardContent = (id: string): string => {
     const found = cards.find(c => c.id === id);
-    return found ? found.front : 'Unknown Card';
+    return found ? found.front : '[Unknown Card]';
   };
 
+  const handleClearHistory = () => {
+    localStorage.removeItem('reviews');
+    setHistory([]);
+  };
+
+  const filteredHistory = filter === 'All'
+    ? history
+    : history.filter(entry => entry.difficulty === filter);
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>🕒 Recently Practiced Cards</h2>
-      {history.length === 0 ? (
-        <p>No practice history found.</p>
+    <div className={styles.historyWrapper}>
+      <h2 className={styles.title}>📘 Review History</h2>
+
+      <div className={styles.controls}>
+        <label>
+          Filter by difficulty:
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="All">All</option>
+            <option value="Easy">Easy</option>
+            <option value="Hard">Hard</option>
+            <option value="Wrong">Wrong</option>
+          </select>
+        </label>
+        <button className={styles.clearButton} onClick={handleClearHistory}>
+          Clear History
+        </button>
+      </div>
+
+      {filteredHistory.length === 0 ? (
+        <p className={styles.empty}>No review history found.</p>
       ) : (
-        <ul>
-          {history.map((entry, idx) => (
-            <li key={idx} style={{ marginBottom: '1rem', borderBottom: '1px solid #ccc', paddingBottom: '0.5rem' }}>
-              <strong>Card:</strong> {getCardContent(entry.cardId)} <br />
-              <strong>Difficulty:</strong> {entry.difficulty} <br />
-              <strong>Reviewed on:</strong> {new Date(entry.date).toLocaleString()}
-            </li>
-          ))}
-        </ul>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Card</th>
+              <th>Difficulty</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredHistory.map((entry, idx) => (
+              <tr key={idx}>
+                <td>{getCardContent(entry.cardId)}</td>
+                <td className={styles[entry.difficulty.toLowerCase()]}>{entry.difficulty}</td>
+                <td>{new Date(entry.date).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
