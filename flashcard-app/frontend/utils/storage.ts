@@ -1,4 +1,4 @@
-import { Flashcard } from '../src/types';
+import { Deck, Flashcard } from '../src/types';
 
 const STORAGE_KEY = 'flashcardData';
 const BOOKMARK_KEY = 'bookmarkedFlashcards';
@@ -29,7 +29,16 @@ const saveToStorage = async <T>(key: string, value: T): Promise<void> => {
 
 // Flashcard-specific API
 export const loadFlashcards = async (): Promise<Flashcard[]> => {
-  return await fetchFromStorage<Flashcard[]>(STORAGE_KEY, []);
+  const rawCards = await fetchFromStorage<any[]>(STORAGE_KEY, []);
+  return rawCards.map(card => ({
+    id: card.id,
+    front: card.front,
+    back: card.back,
+    hint: card.hint,
+    tags: card.tags ?? [],
+    deckId: card.deckId ?? '',
+    bookmarked: card.bookmarked ?? false
+  }));
 };
 
 export const storeFlashcards = async (cards: Flashcard[]): Promise<void> => {
@@ -66,15 +75,21 @@ export const toggleBookmark = async (card: Flashcard): Promise<void> => {
     const updated = bookmarks.filter(b => b.id !== card.id);
     await saveBookmarks(updated);
   } else {
-    bookmarks.push({ ...card, bookmarked: true }); // ✅ this is now valid
+    const normalizedCard: Flashcard = {
+      id: card.id,
+      front: card.front,
+      back: card.back,
+      hint: card.hint,
+      tags: card.tags ?? [],
+      deckId: card.deckId ?? '',
+      bookmarked: true
+    };
+    bookmarks.push(normalizedCard);
     await saveBookmarks(bookmarks);
   }
-
-
-
 };
 
- // 🔥 Streak tracking keys
+// 🔥 Streak tracking keys
 const STREAK_KEY = 'practiceStreak';
 const LAST_PRACTICE_DATE_KEY = 'lastPracticeDate';
 
@@ -83,7 +98,6 @@ export const getPracticeStreak = (): number => {
   const streak = localStorage.getItem(STREAK_KEY);
   return streak ? parseInt(streak, 10) : 0;
 };
-
 
 // 🔁 Update streak if today wasn't already counted
 export const updatePracticeStreak = (): number => {
@@ -100,6 +114,7 @@ export const updatePracticeStreak = (): number => {
 
   return streak;
 };
+
 // Save how many cards were reviewed today (keyed by date)
 const DAILY_PROGRESS_KEY = 'dailyReviewProgress';
 
@@ -123,4 +138,36 @@ export const clearTodayReviewCount = () => {
   const data = JSON.parse(localStorage.getItem(DAILY_PROGRESS_KEY) || '{}');
   delete data[today];
   localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify(data));
+};
+
+const DECK_KEY = 'flashcardDecks';
+
+export const loadDecks = async (): Promise<Deck[]> => {
+  return await fetchFromStorage<Deck[]>(DECK_KEY, []);
+};
+
+export const saveDecks = async (decks: Deck[]): Promise<void> => {
+  await saveToStorage(DECK_KEY, decks);
+};
+
+export const addDeck = async (name: string): Promise<Deck> => {
+  const decks = await loadDecks();
+  const newDeck: Deck = { id: crypto.randomUUID(), name };
+  decks.push(newDeck);
+  await saveDecks(decks);
+  return newDeck;
+};
+
+export const deleteDeck = async (deckId: string): Promise<void> => {
+  const decks = await loadDecks();
+  const filtered = decks.filter(d => d.id !== deckId);
+  await saveDecks(filtered);
+
+  // Also remove deckId from cards
+  const cards = await loadFlashcards();
+  const updatedCards: Flashcard[] = cards.map(c => ({
+    ...c,
+    deckId: c.deckId === deckId ? '' : c.deckId ?? ''
+  }));
+  await storeFlashcards(updatedCards);
 };

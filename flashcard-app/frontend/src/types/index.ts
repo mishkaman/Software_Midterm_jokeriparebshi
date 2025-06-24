@@ -38,6 +38,21 @@ export interface Flashcard {
 
   }
 
+  export interface Deck {
+  id: string;
+  name: string;
+}
+
+export interface Flashcard {
+  id: string;
+  front: string;
+  back: string;
+  hint?: string;
+  tags: string[];
+  deckId: string; // Link to the deck
+  bookmarked?: boolean;
+}
+
 
 
 // --- Re-export Core Types ---

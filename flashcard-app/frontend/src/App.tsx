@@ -6,6 +6,8 @@ import ReviewHistory from './components/ReviewHistory';
 import { ToastContainer } from 'react-toastify';
 import RetryView from './components/retryView';
 import 'react-toastify/dist/ReactToastify.css';
+import DeckList from './components/DeckList';
+import DeckDetails from './components/DeckDetails';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Link to="/dashboard" style={{ margin: '0 1rem' }}>📊 Dashboard</Link>
           <Link to="/history" style={{ margin: '0 1rem' }}>🕒 History</Link> 
           <Link to="/retry" style={{ margin: '0 1rem' }}>🔁 Retry Failed</Link>
+          <Link to="/decks" style={{ margin: '0 1rem' }}>📚 Decks</Link>
+
         </nav>
 
         <div style={{ flex: 1, padding: '2rem', textAlign: 'center', backgroundColor: '#f5f5f5' }}>
@@ -24,6 +28,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/history" element={<ReviewHistory />} />
             <Route path="/retry" element={<RetryView />} /> 
+            <Route path="/decks" element={<DeckList />} />
+            <Route path="/decks/:deckId" element={<DeckDetails />} />
 
           </Routes>
         </div>

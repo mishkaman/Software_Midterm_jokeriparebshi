@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Flashcard } from '../types';
+import { Flashcard } from '../types/index';
 import { fetchPracticeCards, submitAnswer, advanceDay } from '../services/api';
 import FlashcardDisplay from './FlashcardDisplay';
 import { AnswerDifficulty } from '../../../BackEnd/src/logic/flashcards';
@@ -15,8 +15,13 @@ import {
   getTodayReviewCount,
   clearTodayReviewCount
 } from '../../utils/storage';
+import DailySummaryModal from './DailySummaryModal';
+import { useSearchParams } from 'react-router-dom';
 
 const PracticeView: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const selectedDeckId = searchParams.get('deckId');
+
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showBack, setShowBack] = useState(false);
@@ -33,11 +38,34 @@ const PracticeView: React.FC = () => {
   const [streak, setStreak] = useState<number>(0);
   const [dailyCount, setDailyCount] = useState<number>(0);
   const DAILY_GOAL = 10;
+  const [easyCount, setEasyCount] = useState(0);
+  const [hardCount, setHardCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
+  const [showSummary, setShowSummary] = useState(false);
+  const [allCards, setAllCards] = useState<Flashcard[]>([]);
+  const [selectedCards, setSelectedCards] = useState<Flashcard[]>([]);
 
   useEffect(() => {
     setDailyCount(getTodayReviewCount());
     setStreak(getPracticeStreak());
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const cards = await loadFlashcards();
+      setAllCards(cards);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const filtered = allCards
+      .filter(card => selectedTags.length === 0 || selectedTags.every(tag => card.tags?.includes(tag)))
+      .filter(card => !showBookmarkedOnly || card.bookmarked);
+
+    setSelectedCards(filtered);
+    setPracticeCards(filtered);
+  }, [allCards, selectedTags, showBookmarkedOnly]);
 
   const loadPracticeCards = async () => {
     setIsLoading(true);
@@ -130,7 +158,6 @@ const PracticeView: React.FC = () => {
         date: new Date().toISOString(),
         difficulty,
       };
-
       const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
       existing.push(reviewRecord);
       localStorage.setItem('reviews', JSON.stringify(existing));
@@ -138,11 +165,16 @@ const PracticeView: React.FC = () => {
       incrementDailyReviewCount();
       setDailyCount(getTodayReviewCount());
 
+      if (difficulty === AnswerDifficulty.Easy) setEasyCount(c => c + 1);
+      else if (difficulty === AnswerDifficulty.Hard) setHardCount(c => c + 1);
+      else if (difficulty === AnswerDifficulty.Wrong) setWrongCount(c => c + 1);
+
       if (nextIndex < practiceCards.length) {
         setCurrentCardIndex(nextIndex);
         setShowBack(false);
       } else {
         setSessionFinished(true);
+        setShowSummary(true);
         const newStreak = updatePracticeStreak();
         setStreak(newStreak);
       }
@@ -212,7 +244,19 @@ const PracticeView: React.FC = () => {
       <div className={styles.sessionComplete}>
         <h2 className={styles.sessionCompleteTitle}>Session Complete!</h2>
         <p className={styles.sessionCompleteMessage}>Great job! You've completed all your cards for today.</p>
-        <button className={`${styles.button} ${styles.nextDayButton}`} onClick={handleNextDay}>Go to Next Day</button>
+
+        {showSummary && (
+          <div className={styles.summaryBox}>
+            <h3>📊 Practice Summary</h3>
+            <p>✅ Easy: {easyCount}</p>
+            <p>🟠 Hard: {hardCount}</p>
+            <p>❌ Wrong: {wrongCount}</p>
+          </div>
+        )}
+
+        <button className={`${styles.button} ${styles.nextDayButton}`} onClick={handleNextDay}>
+          Go to Next Day
+        </button>
       </div>
     );
   }
@@ -241,28 +285,23 @@ const PracticeView: React.FC = () => {
           🎯 Daily Goal: {dailyCount}/{DAILY_GOAL} cards reviewed
         </p>
         <div className={styles.goalBarWrapper}>
-  <div
-    className={styles.goalBar}
-    style={{
-      width: `${(dailyCount / DAILY_GOAL) * 100}%`,
-      backgroundColor:
-        dailyCount >= DAILY_GOAL
-          ? '#4caf50' // green when goal reached
-          : dailyCount >= DAILY_GOAL * 0.7
-          ? '#ff9800' // orange for 70%+
-          : '#f44336', // red for <70%
-      transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out'
-    }}
-  />
-</div>
-
+          <div
+            className={styles.goalBar}
+            style={{
+              width: `${(dailyCount / DAILY_GOAL) * 100}%`,
+              backgroundColor:
+                dailyCount >= DAILY_GOAL
+                  ? '#4caf50'
+                  : dailyCount >= DAILY_GOAL * 0.7
+                  ? '#ff9800'
+                  : '#f44336',
+              transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out'
+            }}
+          />
+        </div>
       </div>
 
-      <TagFilter
-        availableTags={availableTags}
-        selectedTags={selectedTags}
-        onTagChange={handleTagChange}
-      />
+      <TagFilter availableTags={availableTags} selectedTags={selectedTags} onTagChange={handleTagChange} />
 
       <div className={styles.searchContainer}>
         <input
@@ -289,30 +328,18 @@ const PracticeView: React.FC = () => {
 
       <div className={styles.buttonsContainer}>
         {!showBack ? (
-          <button
-            className={`${styles.button} ${styles.showAnswerButton}`}
-            onClick={handleShowBack}
-          >
+          <button className={`${styles.button} ${styles.showAnswerButton}`} onClick={handleShowBack}>
             Show Answer
           </button>
         ) : (
           <>
-            <button
-              className={`${styles.button} ${styles.easyButton}`}
-              onClick={() => handleAnswer(AnswerDifficulty.Easy)}
-            >
+            <button className={`${styles.button} ${styles.easyButton}`} onClick={() => handleAnswer(AnswerDifficulty.Easy)}>
               Easy
             </button>
-            <button
-              className={`${styles.button} ${styles.hardButton}`}
-              onClick={() => handleAnswer(AnswerDifficulty.Hard)}
-            >
+            <button className={`${styles.button} ${styles.hardButton}`} onClick={() => handleAnswer(AnswerDifficulty.Hard)}>
               Hard
             </button>
-            <button
-              className={`${styles.button} ${styles.wrongButton}`}
-              onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
-            >
+            <button className={`${styles.button} ${styles.wrongButton}`} onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>
               Wrong
             </button>
           </>
