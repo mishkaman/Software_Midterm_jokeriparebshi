@@ -16,18 +16,6 @@ import {
   clearTodayReviewCount
 } from '../../utils/storage';
 
-const [dailyCount, setDailyCount] = useState<number>(0);
-const DAILY_GOAL = 10; // you can make this dynamic later
-useEffect(() => {
-  setDailyCount(getTodayReviewCount());
-}, []);
-
-const [streak, setStreak] = useState<number>(0);
-
-useEffect(() => {
-  setStreak(getPracticeStreak());
-}, []);
-
 const PracticeView: React.FC = () => {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -42,6 +30,14 @@ const PracticeView: React.FC = () => {
   const [lastDifficulty, setLastDifficulty] = useState<AnswerDifficulty | null>(null);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [streak, setStreak] = useState<number>(0);
+  const [dailyCount, setDailyCount] = useState<number>(0);
+  const DAILY_GOAL = 10;
+
+  useEffect(() => {
+    setDailyCount(getTodayReviewCount());
+    setStreak(getPracticeStreak());
+  }, []);
 
   const loadPracticeCards = async () => {
     setIsLoading(true);
@@ -77,18 +73,19 @@ const PracticeView: React.FC = () => {
       if (transformedCards.length === 0) {
         setSessionFinished(true);
       }
-      const newStreak = updatePracticeStreak();
-setStreak(newStreak);
 
-if (newStreak === 1) {
-  toast('✅  First streak started! Keep going!');
-} else if (newStreak === 5) {
-  toast('🎉 5-day streak! You’re on fire!');
-} else if (newStreak === 10) {
-  toast('🏆 10-day streak! Champion mode!');
-} else {
-  toast(`🔥Streak: ${newStreak} days`);
-}
+      const newStreak = updatePracticeStreak();
+      setStreak(newStreak);
+
+      if (newStreak === 1) {
+        toast('✅  First streak started! Keep going!');
+      } else if (newStreak === 5) {
+        toast('🎉 5-day streak! You’re on fire!');
+      } else if (newStreak === 10) {
+        toast('🏆 10-day streak! Champion mode!');
+      } else {
+        toast(`🔥Streak: ${newStreak} days`);
+      }
     } catch (err) {
       setError('Failed to load practice cards. Please try again.');
     } finally {
@@ -119,62 +116,56 @@ if (newStreak === 1) {
     setShowBack(true);
   };
 
- const handleAnswer = async (difficulty: AnswerDifficulty) => {
-  if (currentCardIndex >= practiceCards.length) return;
+  const handleAnswer = async (difficulty: AnswerDifficulty) => {
+    if (currentCardIndex >= practiceCards.length) return;
 
-  const currentCard = practiceCards[currentCardIndex];
+    const currentCard = practiceCards[currentCardIndex];
 
-  try {
-    await submitAnswer(currentCard.front, currentCard.back, difficulty);
-    const nextIndex = currentCardIndex + 1;
+    try {
+      await submitAnswer(currentCard.front, currentCard.back, difficulty);
+      const nextIndex = currentCardIndex + 1;
 
-    const reviewRecord = {
-      cardId: currentCard.front,
-      date: new Date().toISOString(),
-      difficulty,
-    };
+      const reviewRecord = {
+        cardId: currentCard.front,
+        date: new Date().toISOString(),
+        difficulty,
+      };
 
-    const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
-    existing.push(reviewRecord);
-    localStorage.setItem('reviews', JSON.stringify(existing));
+      const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
+      existing.push(reviewRecord);
+      localStorage.setItem('reviews', JSON.stringify(existing));
 
-    if (nextIndex < practiceCards.length) {
-  setCurrentCardIndex(nextIndex);
-  setShowBack(false);
-} else {
-  setSessionFinished(true);
-const newStreak = updatePracticeStreak();
-setStreak(newStreak);
+      incrementDailyReviewCount();
+      setDailyCount(getTodayReviewCount());
 
-}
-await submitAnswer(currentCard.front, currentCard.back, difficulty);
-
-// Track daily count
-incrementDailyReviewCount();
-setDailyCount(getTodayReviewCount());
-
-  } catch (err) {
-    setError('Failed to submit your answer. Please try again.');
-  }
-};
-
-
-const handleNextDay = async () => {
-  try {
-    if (dailyCount >= DAILY_GOAL) {
-      toast.success('🎉 You reached your daily goal!');
+      if (nextIndex < practiceCards.length) {
+        setCurrentCardIndex(nextIndex);
+        setShowBack(false);
+      } else {
+        setSessionFinished(true);
+        const newStreak = updatePracticeStreak();
+        setStreak(newStreak);
+      }
+    } catch (err) {
+      setError('Failed to submit your answer. Please try again.');
     }
+  };
 
-    await advanceDay();
-    await loadPracticeCards();
-    setCurrentCardIndex(0);
-    clearTodayReviewCount();
-    setDailyCount(0);
-  } catch (err) {
-    setError('Failed to advance to next day. Please try again.');
-  }
-};
+  const handleNextDay = async () => {
+    try {
+      if (dailyCount >= DAILY_GOAL) {
+        toast.success('🎉 You reached your daily goal!');
+      }
 
+      await advanceDay();
+      await loadPracticeCards();
+      setCurrentCardIndex(0);
+      clearTodayReviewCount();
+      setDailyCount(0);
+    } catch (err) {
+      setError('Failed to advance to next day. Please try again.');
+    }
+  };
 
   const onGestureDetected = useCallback((gesture: Gesture) => {
     if (!gestureEnabled || lastDifficulty !== null) return;
@@ -198,17 +189,6 @@ const handleNextDay = async () => {
       setTimeout(() => handleAnswer(difficulty!), 1000);
     }
   }, [gestureEnabled, lastDifficulty, handleAnswer]);
-  <div className={styles.goalProgressBar}>
-  <p className={styles.goalText}>
-    🎯 Daily Goal: {dailyCount}/{DAILY_GOAL} cards reviewed
-  </p>
-  <div className={styles.goalBarWrapper}>
-    <div
-      className={styles.goalBar}
-      style={{ width: `${(dailyCount / DAILY_GOAL) * 100}%` }}
-    />
-  </div>
-</div>
 
   const renderProgressBar = () => {
     const percent = (currentCardIndex / practiceCards.length) * 100;
@@ -252,9 +232,31 @@ const handleNextDay = async () => {
           <span className={styles.progressIndicator}>Card {currentCardIndex + 1} of {practiceCards.length}</span>
         </div>
       </div>
-    <div className={styles.streakDisplay}>
+      <div className={styles.streakDisplay}>
         🔥 Current Streak: <strong>{streak}</strong> day{streak === 1 ? '' : 's'}
-    </div>
+      </div>
+
+      <div className={styles.goalProgressBar}>
+        <p className={styles.goalText}>
+          🎯 Daily Goal: {dailyCount}/{DAILY_GOAL} cards reviewed
+        </p>
+        <div className={styles.goalBarWrapper}>
+  <div
+    className={styles.goalBar}
+    style={{
+      width: `${(dailyCount / DAILY_GOAL) * 100}%`,
+      backgroundColor:
+        dailyCount >= DAILY_GOAL
+          ? '#4caf50' // green when goal reached
+          : dailyCount >= DAILY_GOAL * 0.7
+          ? '#ff9800' // orange for 70%+
+          : '#f44336', // red for <70%
+      transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out'
+    }}
+  />
+</div>
+
+      </div>
 
       <TagFilter
         availableTags={availableTags}
