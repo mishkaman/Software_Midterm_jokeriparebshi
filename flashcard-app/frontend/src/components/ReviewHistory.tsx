@@ -41,7 +41,7 @@ const ReviewHistory: React.FC = () => {
 
   return (
     <div className={styles.historyWrapper}>
-      <h2 className={styles.title}>📘 Review History</h2>
+      <h2 style={{ padding: '2rem', color: '#000000'  }}>📘 Review History</h2>
 
       <div className={styles.controls}>
         <label>

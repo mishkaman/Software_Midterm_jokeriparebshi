@@ -109,6 +109,8 @@ const PracticeView: React.FC = () => {
 
       const newStreak = updatePracticeStreak();
       setStreak(newStreak);
+      setDay(newStreak);
+
 
       if (newStreak === 1) {
         toast('✅  First streak started! Keep going!');
@@ -159,7 +161,7 @@ const PracticeView: React.FC = () => {
       const nextIndex = currentCardIndex + 1;
 
       const reviewRecord = {
-        cardId: currentCard.front,
+        cardId: currentCard.id,
         date: new Date().toISOString(),
         difficulty,
       };
@@ -325,11 +327,24 @@ const PracticeView: React.FC = () => {
       </div>
 
       {showBack && (
-        <>
-          <p className={styles.gestureText}>Rate using gestures (👍 Easy, ✋ Hard, 👎 Wrong)</p>
-          <GestureDetector active={gestureEnabled} onGestureDetected={onGestureDetected} />
-        </>
-      )}
+  <>
+    <GestureDetector
+      active={true}
+      onGestureDetected={(gesture) => {
+        if (gesture === 'thumbsUp') handleAnswer(AnswerDifficulty.Easy);
+        else if (gesture === 'thumbsDown') handleAnswer(AnswerDifficulty.Wrong);
+        else if (gesture === 'flatHand') handleAnswer(AnswerDifficulty.Hard);
+      }}
+    />
+    <div className={styles.manualButtons}>
+      <button onClick={() => handleAnswer(AnswerDifficulty.Easy)}>✅ Easy</button>
+      <button onClick={() => handleAnswer(AnswerDifficulty.Hard)}>⚠️ Hard</button>
+      <button onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>❌ Wrong</button>
+      <button onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>🚫 Give Up</button>
+    </div>
+  </>
+)}
+
 
       <div className={styles.buttonsContainer}>
         {!showBack ? (

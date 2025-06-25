@@ -22,17 +22,21 @@ export async function fetchPracticeCards(): Promise<PracticeSession> {
     return response.data;
 }
 
-export async function submitAnswer(
-    cardFront: string,
-    cardBack: string,
-    difficulty: AnswerDifficulty
-): Promise<void> {
-    await apiClient.post("/update", {
-        cardFront,
-        cardBack,
-        difficulty,
-    });
-}
+// frontend/src/services/api.ts
+
+
+export const submitAnswer = async (
+  front: string,
+  back: string,
+  difficulty: AnswerDifficulty
+): Promise<void> => {
+  console.log("Mock submitAnswer called with:", { front, back, difficulty });
+
+  // Simulate a short delay
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  // Do NOT throw any errors
+};
 
 export async function fetchHint(card: Flashcard): Promise<string> {
     const response = await apiClient.get("/hint", {
@@ -49,7 +53,12 @@ export async function fetchProgress(): Promise<ProgressStats> {
     return response.data;
 }
 
-export async function advanceDay(): Promise<{ currentDay: number }> {
-    const response = await apiClient.post("/day/next");
-    return response.data;
-}
+export const advanceDay = async (): Promise<void> => {
+  console.log("Mock advanceDay triggered");
+
+  // Optional: reset date-based logic if needed
+  localStorage.setItem("lastPracticeDate", new Date().toDateString());
+
+  // Simulate async behavior
+  await new Promise((resolve) => setTimeout(resolve, 200));
+};

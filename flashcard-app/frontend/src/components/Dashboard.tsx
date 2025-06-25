@@ -24,8 +24,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <h2>📈 Review Progress</h2>
-      <ul>
+      <h2 style={{ padding: '2rem', color: '#000000'  }}>📈 Review Progress</h2>
+      <ul style={{color: '#000000' }}>
         {Object.entries(reviewStats).map(([day, count]) => (
           <li key={day}>{day}: {count} cards reviewed</li>
         ))}

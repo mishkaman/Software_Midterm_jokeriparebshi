@@ -53,9 +53,8 @@ const AnalyticsDashboard: React.FC = () => {
   return (
     <div style={{ padding: '1rem' }}>
       <h2>📊 Flashcard Analytics</h2>
-
-      <div style={{ maxWidth: 600, marginBottom: 32 }}>
-        <h3>Daily Reviews (Last 7 Days)</h3>
+      <div style={{ maxWidth: 600, marginBottom: 32, margin: 'auto'}}>
+        <h3 style={{color: '#000000'}}>Daily Reviews (Last 7 Days)</h3>
         <Bar
           data={{
             labels: past7Days,
@@ -68,8 +67,8 @@ const AnalyticsDashboard: React.FC = () => {
         />
       </div>
 
-      <div style={{ maxWidth: 400, marginBottom: 32 }}>
-        <h3>Difficulty Breakdown</h3>
+      <div style={{ maxWidth: 400, marginBottom: 32, margin: 'auto' }}>
+        <h3 style={{color: '#000000'}}>Difficulty Breakdown</h3>
         <Pie
           data={{
             labels: ['Easy', 'Hard', 'Wrong'],
@@ -81,8 +80,8 @@ const AnalyticsDashboard: React.FC = () => {
         />
       </div>
 
-      <div style={{ maxWidth: 600 }}>
-        <h3>Top Tags Reviewed</h3>
+      <div style={{ maxWidth: 600, marginBottom: 32, margin: 'auto' }}>
+        <h3 style={{color: '#000000'}}>Top Tags Reviewed</h3>
         <Bar
           data={{
             labels: topTags.map(([tag]) => tag),
