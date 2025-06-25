@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Deck } from '../types';
 import { loadDecks, addDeck, deleteDeck } from '../../utils/storage';
 import { Link } from 'react-router-dom';
+import styles from './DeckList.module.css';
+
 
 const DeckList: React.FC = () => {
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -23,11 +25,11 @@ const DeckList: React.FC = () => {
     setDecks(prev => prev.filter(d => d.id !== id));
   };
 
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h2>📚 Your Decks</h2>
+return (
+    <div className={styles.container}>
+      <h2 className={styles.title}>📚 Your Decks</h2>
 
-      <div>
+      <div className={styles.deckForm}>
         <input
           type="text"
           value={newDeckName}
@@ -37,11 +39,14 @@ const DeckList: React.FC = () => {
         <button onClick={handleAddDeck}>➕ Add Deck</button>
       </div>
 
-      <ul>
+      <ul className={styles.deckList}>
         {decks.map(deck => (
-          <li key={deck.id}>
+          <li key={deck.id} className={styles.deckItem}>
             <Link to={`/decks/${deck.id}`}>{deck.name}</Link>
-            <button onClick={() => handleDeleteDeck(deck.id)} style={{ marginLeft: '1rem' }}>
+            <button
+              className={styles.deleteButton}
+              onClick={() => handleDeleteDeck(deck.id)}
+            >
               ❌ Delete
             </button>
           </li>

@@ -4,12 +4,13 @@ import PracticeView from './components/PracticeView';
 import Dashboard from './components/Dashboard';
 import ReviewHistory from './components/ReviewHistory';
 import { ToastContainer } from 'react-toastify';
-import RetryView from './components/retryView';
+import RetryView from './components/RetryView';
 import 'react-toastify/dist/ReactToastify.css';
 import DeckList from './components/DeckList';
 import DeckDetails from './components/DeckDetails';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import FlashcardForm from './components/FlashcardForm';
+import CreateCardForm from './components/CreateCardForm';
 
 
 
@@ -39,6 +40,8 @@ function App() {
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/create" element={<FlashcardForm />} />
             <Route path="/history" element={<ReviewHistory />} />
+            <Route path="/create" element={<CreateCardForm />} />
+           
           </Routes>
         </div>
 

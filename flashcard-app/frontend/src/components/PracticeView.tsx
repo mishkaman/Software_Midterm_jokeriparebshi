@@ -93,14 +93,19 @@ const PracticeView: React.FC = () => {
         back: card.back,
         hint: card.hint,
         tags: [...(card.tags || [])],
-        deckId: card.deckId || ""
+        deckId: card.deckId || "",
+        bookmarked: true
+
       }));
 
       setPracticeCards(transformedCards);
 
-      if (transformedCards.length === 0) {
-        setSessionFinished(true);
-      }
+      if (transformedCards.length === 0 && (selectedTags.length > 0 || searchTerm || showBookmarkedOnly)) {
+  setSessionFinished(true);
+} else if (transformedCards.length === 0) {
+  setError('No cards found. Try checking your filters or adding cards.');
+}
+
 
       const newStreak = updatePracticeStreak();
       setStreak(newStreak);

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as handpose from '@tensorflow-models/handpose';
 import Webcam from 'react-webcam';
-import './GestureDetector.css';
+import './Gesture.css';
 
 export type Gesture = 'thumbsUp' | 'thumbsDown' | 'flatHand' | null;
 

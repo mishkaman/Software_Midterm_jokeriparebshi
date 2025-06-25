@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Flashcard, Deck } from '../types';
 import { loadDecks, loadFlashcards, storeFlashcards } from '../../utils/storage';
+import styles from './FlashcardForm.module.css';
+
 
 const FlashcardForm: React.FC = () => {
   const [front, setFront] = useState('');
@@ -46,6 +48,8 @@ const FlashcardForm: React.FC = () => {
   };
 
   return (
+    <div className={styles.container}>
+  <form onSubmit={handleSubmit}>
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
       <h2>Create a New Flashcard</h2>
       <form onSubmit={handleSubmit}>
@@ -74,10 +78,14 @@ const FlashcardForm: React.FC = () => {
           <label>Tags (comma separated):</label>
           <input type="text" value={tagsInput} onChange={e => setTagsInput(e.target.value)} />
         </div>
-        <button type="submit">Create Flashcard</button>
+        <button type="submit" >Create Flashcard</button>
       </form>
       {status && <p>{status}</p>}
     </div>
+      </form>
+  {status && <p>{status}</p>}
+</div>
+
   );
 };
 
