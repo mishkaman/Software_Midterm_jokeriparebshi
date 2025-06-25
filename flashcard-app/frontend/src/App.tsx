@@ -9,6 +9,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import DeckList from './components/DeckList';
 import DeckDetails from './components/DeckDetails';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import FlashcardForm from './components/FlashcardForm';
+
+
 
 
 function App() {
@@ -22,8 +25,7 @@ function App() {
           <Link to="/retry" style={{ margin: '0 1rem' }}>🔁 Retry Failed</Link>
           <Link to="/decks" style={{ margin: '0 1rem' }}>📚 Decks</Link>
           <Link to="/analytics" style={{ margin: '0 1rem' }}>📈 Analytics</Link>
-
-
+          <Link to="/create" style={{ margin: '0 1rem' }}>➕ New Flashcard</Link>          
         </nav>
 
         <div style={{ flex: 1, padding: '2rem', textAlign: 'center', backgroundColor: '#f5f5f5' }}>
@@ -35,8 +37,8 @@ function App() {
             <Route path="/decks" element={<DeckList />} />
             <Route path="/decks/:deckId" element={<DeckDetails />} />
             <Route path="/analytics" element={<AnalyticsDashboard />} />
-
-
+            <Route path="/create" element={<FlashcardForm />} />
+            <Route path="/history" element={<ReviewHistory />} />
           </Routes>
         </div>
 
