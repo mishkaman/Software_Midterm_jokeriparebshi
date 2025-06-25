@@ -29,18 +29,18 @@ const saveToStorage = async <T>(key: string, value: T): Promise<void> => {
 
 // Flashcard-specific API
 export const loadFlashcards = async (): Promise<Flashcard[]> => {
-  const rawCards = await fetchFromStorage<any[]>(STORAGE_KEY, []);
-  return rawCards.map(card => ({
-    id: card.id,
-    front: card.front,
-    back: card.back,
-    hint: card.hint,
-    tags: card.tags ?? [],
-    deckId: card.deckId ?? '',
-    bookmarked: card.bookmarked ?? false
+  const raw = JSON.parse(localStorage.getItem('flashcardData') || '[]');
+
+  return raw.map((c: any): Flashcard => ({
+    id: c.id,
+    front: c.front,
+    back: c.back,
+    hint: c.hint ?? '',
+    tags: c.tags ?? [],
+    deckId: c.deckId ?? '',
+    bookmarked: !!c.bookmarked
   }));
 };
-
 export const storeFlashcards = async (cards: Flashcard[]): Promise<void> => {
   await saveToStorage(STORAGE_KEY, cards);
 };

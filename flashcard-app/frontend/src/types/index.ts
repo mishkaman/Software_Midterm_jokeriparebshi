@@ -33,7 +33,7 @@ export interface Flashcard {
     back: string;          // Required property
     hint?: string;         // Optional property
     tags: string[];        // Mutable property
-    deckId: string;        // Required property
+    deckId?: string;        // Required property
       bookmarked?: boolean;
 
   }
@@ -43,18 +43,9 @@ export interface Flashcard {
   name: string;
 }
 
-export interface Flashcard {
-  id: string;
-  front: string;
-  back: string;
-  hint?: string;
-  tags: string[];
-  deckId: string; // Link to the deck
-  bookmarked?: boolean;
+
+export enum AnswerDifficulty {
+  Wrong = 0,
+  Hard = 1,
+  Easy = 2
 }
-
-
-
-// --- Re-export Core Types ---
-export type AnswerDifficulty = CoreDifficulty;
-export type BucketMap = CoreBucketMap;

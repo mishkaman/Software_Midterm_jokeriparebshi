@@ -38,8 +38,7 @@ function App() {
             <Route path="/decks" element={<DeckList />} />
             <Route path="/decks/:deckId" element={<DeckDetails />} />
             <Route path="/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/create" element={<FlashcardForm />} />
-            <Route path="/history" element={<ReviewHistory />} />
+            <Route path="/flash" element={<FlashcardForm />} />
             <Route path="/create" element={<CreateCardForm />} />
            
           </Routes>

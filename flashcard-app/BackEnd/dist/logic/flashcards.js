@@ -1,24 +1,24 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnswerDifficulty = exports.Flashcard = void 0;
 class Flashcard {
-    constructor(front, // Required parameter
-    back, // Required parameter
-    deckId, // Required parameter
-    hint, // Optional parameter
-    tags = [] // Optional parameter with default value
-    ) {
-        this.front = front;
-        this.back = back;
-        this.deckId = deckId;
-        this.hint = hint;
-        this.tags = tags;
-    }
+  constructor(front, back, deckId, hint, tags = [], bookmarked = false) {
+    this.id = this.generateId();
+    this.front = front;
+    this.back = back;
+    this.deckId = deckId || ""; // ensure string
+    this.hint = hint;
+    this.tags = tags;
+    this.bookmarked = bookmarked;
+  }
+
+  generateId() {
+    // Simple unique id generator
+    return Math.random().toString(36).slice(2, 10);
+  }
 }
-exports.Flashcard = Flashcard;
-var AnswerDifficulty;
-(function (AnswerDifficulty) {
-    AnswerDifficulty[AnswerDifficulty["Wrong"] = 0] = "Wrong";
-    AnswerDifficulty[AnswerDifficulty["Hard"] = 1] = "Hard";
-    AnswerDifficulty[AnswerDifficulty["Easy"] = 2] = "Easy";
-})(AnswerDifficulty || (exports.AnswerDifficulty = AnswerDifficulty = {}));
+
+const AnswerDifficulty = {
+  Wrong: 0,
+  Hard: 1,
+  Easy: 2,
+};
+
+module.exports = { Flashcard, AnswerDifficulty };

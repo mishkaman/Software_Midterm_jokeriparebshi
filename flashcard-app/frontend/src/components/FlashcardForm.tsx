@@ -31,7 +31,7 @@ const FlashcardForm: React.FC = () => {
       back: back.trim(),
       hint: hint.trim(),
       tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean),
-      deckId,
+      deckId: deckId || undefined, // pass undefined if empty string
       bookmarked: false
     };
 
@@ -67,12 +67,12 @@ const FlashcardForm: React.FC = () => {
         </div>
         <div>
           <label>Deck:</label>
-          <select value={deckId} onChange={e => setDeckId(e.target.value)} required>
-            <option value="">Select a deck</option>
-            {decks.map(deck => (
-              <option key={deck.id} value={deck.id}>{deck.name}</option>
-            ))}
-          </select>
+          <select value={deckId} onChange={e => setDeckId(e.target.value)}>
+  <option value="">Select a deck</option>
+  {decks.map(deck => (
+    <option key={deck.id} value={deck.id}>{deck.name}</option>
+  ))}
+</select>
         </div>
         <div>
           <label>Tags (comma separated):</label>

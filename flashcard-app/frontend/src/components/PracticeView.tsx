@@ -6,6 +6,7 @@ import { AnswerDifficulty } from '../../../BackEnd/src/logic/flashcards';
 import styles from './PracticeView.module.css';
 import { loadFlashcards } from '../../utils/storage';
 import { filterFlashcardsByTags } from '../../utils/tagFilter';
+import Select from 'react-select';
 import TagFilter from './tagFilter';
 import GestureDetector, { Gesture } from './GestureDetection/Gesture';
 import { updatePracticeStreak, getPracticeStreak } from '../../utils/storage';
@@ -44,6 +45,7 @@ const PracticeView: React.FC = () => {
   const [showSummary, setShowSummary] = useState(false);
   const [allCards, setAllCards] = useState<Flashcard[]>([]);
   const [selectedCards, setSelectedCards] = useState<Flashcard[]>([]);
+  const [typedAnswer, setTypedAnswer] = useState('');
 
   useEffect(() => {
     setDailyCount(getTodayReviewCount());
@@ -273,6 +275,8 @@ const PracticeView: React.FC = () => {
   }
 
   const currentCard = practiceCards[currentCardIndex];
+  const tagOptions = availableTags.map(tag => ({ value: tag, label: tag }));
+
 
   return (
     <div className={styles.practiceContainer}>
@@ -307,19 +311,63 @@ const PracticeView: React.FC = () => {
           />
         </div>
       </div>
+<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: '#FFFFFF'}}>
+<Select
+  isMulti
+  options={tagOptions}
+  value={tagOptions.filter(option => selectedTags.includes(option.value))}
+  onChange={(selected) => {
+    const newTags = selected.map(option => option.value);
+    setSelectedTags(newTags);
+  }}
+  placeholder="Filter by tags..."
+  styles={{
+    control: (base) => ({
+      ...base,
+      backgroundColor: '#2c2c2c',
+      borderColor: '#444',
+      color: '#fff',
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: '#2c2c2c',
+      color: '#fff',
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? '#444' : '#2c2c2c',
+      color: '#fff',
+      cursor: 'pointer',
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: '#444',
+      color: '#fff',
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: '#fff',
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: '#bbb',
+      ':hover': {
+        backgroundColor: '#666',
+        color: '#fff',
+      },
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#fff',
+    }),
+    input: (base) => ({
+      ...base,
+      color: '#fff',
+    }),
+  }}
+/>
 
-      <TagFilter availableTags={availableTags} selectedTags={selectedTags} onTagChange={handleTagChange} />
-
-      <div className={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Search cards..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
-        />
-      </div>
-
+</div>
       {renderProgressBar()}
 
       <div className={styles.flashcardContainer}>
@@ -336,12 +384,33 @@ const PracticeView: React.FC = () => {
         else if (gesture === 'flatHand') handleAnswer(AnswerDifficulty.Hard);
       }}
     />
-    <div className={styles.manualButtons}>
-      <button onClick={() => handleAnswer(AnswerDifficulty.Easy)}>✅ Easy</button>
-      <button onClick={() => handleAnswer(AnswerDifficulty.Hard)}>⚠️ Hard</button>
-      <button onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>❌ Wrong</button>
-      <button onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>🚫 Give Up</button>
-    </div>
+   <div className={styles.manualButtons}>
+  <button
+    style={{
+      width: '200px',
+      height: '70px',
+      backgroundColor: 'gray',
+          marginRight: '1rem'
+    }}
+    className={`${styles.button} ${styles.showAnswerButton}`}
+    onClick={handleShowBack}
+  >
+    Show Answer
+  </button>
+
+  <button
+    style={{
+      width: '200px',
+      height: '70px',
+      backgroundColor: 'gray'
+    }}
+    className={`${styles.button} ${styles.showAnswerButton}`}
+    onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
+  >
+    🚫 Give Up
+  </button>
+</div>
+
   </>
 )}
 
@@ -354,19 +423,19 @@ const PracticeView: React.FC = () => {
         ) : (
           <>
             <button className={`${styles.button} ${styles.easyButton}`} onClick={() => handleAnswer(AnswerDifficulty.Easy)}>
-              Easy
+              ✅ Easy
             </button>
             <button className={`${styles.button} ${styles.hardButton}`} onClick={() => handleAnswer(AnswerDifficulty.Hard)}>
-              Hard
+              ⚠️ Hard
             </button>
             <button className={`${styles.button} ${styles.wrongButton}`} onClick={() => handleAnswer(AnswerDifficulty.Wrong)}>
-              Wrong
+              ❌ Wrong
             </button>
           </>
         )}
 
         <div className={styles.toggleContainer}>
-          <label>
+          <label style = {{color: '#FFFFFF'}}>
             <input
               type="checkbox"
               checked={showBookmarkedOnly}
