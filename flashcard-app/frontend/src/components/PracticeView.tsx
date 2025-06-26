@@ -89,35 +89,33 @@ const PracticeView: React.FC = () => {
           return inSearch && inBookmarks;
         });
 
-      const transformedCards: Flashcard[] = filtered.map(card => ({
-        id: card.front,
+      // Fixed: Use consistent ID - either use the original card.id or create a consistent one
+      const transformedCards: Flashcard[] = filtered.map((card, index) => ({
+        id: card.id || card.front || `card-${index}`, // Use original ID, fallback to front, then index
         front: card.front,
         back: card.back,
         hint: card.hint,
         tags: [...(card.tags || [])],
         deckId: card.deckId || "",
-        bookmarked: true
-
+        bookmarked: card.bookmarked || false
       }));
 
       setPracticeCards(transformedCards);
 
       if (transformedCards.length === 0 && (selectedTags.length > 0 || searchTerm || showBookmarkedOnly)) {
-  setSessionFinished(true);
-} else if (transformedCards.length === 0) {
-  setError('No cards found. Try checking your filters or adding cards.');
-}
-
+        setSessionFinished(true);
+      } else if (transformedCards.length === 0) {
+        setError('No cards found. Try checking your filters or adding cards.');
+      }
 
       const newStreak = updatePracticeStreak();
       setStreak(newStreak);
       setDay(newStreak);
 
-
       if (newStreak === 1) {
         toast('✅  First streak started! Keep going!');
       } else if (newStreak === 5) {
-        toast('🎉 5-day streak! You’re on fire!');
+        toast('🎉 5-day streak! You\'re on fire!');
       } else if (newStreak === 10) {
         toast('🏆 10-day streak! Champion mode!');
       } else {
@@ -142,7 +140,7 @@ const PracticeView: React.FC = () => {
       setGestureEnabled(false);
     }
   }, [showBack]);
-
+   
   const handleTagChange = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -162,11 +160,17 @@ const PracticeView: React.FC = () => {
       await submitAnswer(currentCard.front, currentCard.back, difficulty);
       const nextIndex = currentCardIndex + 1;
 
+      // Fixed: Store review with consistent cardId that matches what RetryView expects
       const reviewRecord = {
-        cardId: currentCard.id,
+        cardId: currentCard.id, // Use the consistent ID
+        front: currentCard.front, // Also store front text as backup
         date: new Date().toISOString(),
-        difficulty,
+        difficulty: difficulty === AnswerDifficulty.Easy ? 'Easy' : 
+                   difficulty === AnswerDifficulty.Hard ? 'Hard' : 'Wrong',
       };
+      
+      console.log('Storing review:', reviewRecord); // Debug log
+      
       const existing = JSON.parse(localStorage.getItem('reviews') || '[]');
       existing.push(reviewRecord);
       localStorage.setItem('reviews', JSON.stringify(existing));
@@ -277,7 +281,6 @@ const PracticeView: React.FC = () => {
   const currentCard = practiceCards[currentCardIndex];
   const tagOptions = availableTags.map(tag => ({ value: tag, label: tag }));
 
-
   return (
     <div className={styles.practiceContainer}>
       <div className={styles.header}>
@@ -311,63 +314,63 @@ const PracticeView: React.FC = () => {
           />
         </div>
       </div>
-<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: '#FFFFFF'}}>
-<Select
-  isMulti
-  options={tagOptions}
-  value={tagOptions.filter(option => selectedTags.includes(option.value))}
-  onChange={(selected) => {
-    const newTags = selected.map(option => option.value);
-    setSelectedTags(newTags);
-  }}
-  placeholder="Filter by tags..."
-  styles={{
-    control: (base) => ({
-      ...base,
-      backgroundColor: '#2c2c2c',
-      borderColor: '#444',
-      color: '#fff',
-    }),
-    menu: (base) => ({
-      ...base,
-      backgroundColor: '#2c2c2c',
-      color: '#fff',
-    }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isFocused ? '#444' : '#2c2c2c',
-      color: '#fff',
-      cursor: 'pointer',
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: '#444',
-      color: '#fff',
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: '#fff',
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: '#bbb',
-      ':hover': {
-        backgroundColor: '#666',
-        color: '#fff',
-      },
-    }),
-    singleValue: (base) => ({
-      ...base,
-      color: '#fff',
-    }),
-    input: (base) => ({
-      ...base,
-      color: '#fff',
-    }),
-  }}
-/>
-
-</div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: '#FFFFFF'}}>
+        <Select
+          isMulti
+          options={tagOptions}
+          value={tagOptions.filter(option => selectedTags.includes(option.value))}
+          onChange={(selected) => {
+            const newTags = (selected || []).map((option: any) => option.value);
+            setSelectedTags(newTags);
+          }}
+          placeholder="Filter by tags..."
+          styles={{
+            control: (base) => ({
+              ...base,
+              backgroundColor: '#2c2c2c',
+              borderColor: '#444',
+              color: '#fff',
+            }),
+            menu: (base) => ({
+              ...base,
+              backgroundColor: '#2c2c2c',
+              color: '#fff',
+            }),
+            option: (base, state) => ({
+              ...base,
+              backgroundColor: state.isFocused ? '#444' : '#2c2c2c',
+              color: '#fff',
+              cursor: 'pointer',
+            }),
+            multiValue: (base) => ({
+              ...base,
+              backgroundColor: '#444',
+              color: '#fff',
+            }),
+            multiValueLabel: (base) => ({
+              ...base,
+              color: '#fff',
+            }),
+            multiValueRemove: (base) => ({
+              ...base,
+              color: '#bbb',
+              ':hover': {
+                backgroundColor: '#666',
+                color: '#fff',
+              },
+            }),
+            singleValue: (base) => ({
+              ...base,
+              color: '#fff',
+            }),
+            input: (base) => ({
+              ...base,
+              color: '#fff',
+            }),
+          }}
+        />
+      </div>
+      
       {renderProgressBar()}
 
       <div className={styles.flashcardContainer}>
@@ -375,45 +378,43 @@ const PracticeView: React.FC = () => {
       </div>
 
       {showBack && (
-  <>
-    <GestureDetector
-      active={true}
-      onGestureDetected={(gesture) => {
-        if (gesture === 'thumbsUp') handleAnswer(AnswerDifficulty.Easy);
-        else if (gesture === 'thumbsDown') handleAnswer(AnswerDifficulty.Wrong);
-        else if (gesture === 'flatHand') handleAnswer(AnswerDifficulty.Hard);
-      }}
-    />
-   <div className={styles.manualButtons}>
-  <button
-    style={{
-      width: '200px',
-      height: '70px',
-      backgroundColor: 'gray',
-          marginRight: '1rem'
-    }}
-    className={`${styles.button} ${styles.showAnswerButton}`}
-    onClick={handleShowBack}
-  >
-    Show Answer
-  </button>
+        <>
+          <GestureDetector
+            active={true}
+            onGestureDetected={(gesture) => {
+              if (gesture === 'thumbsUp') handleAnswer(AnswerDifficulty.Easy);
+              else if (gesture === 'thumbsDown') handleAnswer(AnswerDifficulty.Wrong);
+              else if (gesture === 'flatHand') handleAnswer(AnswerDifficulty.Hard);
+            }}
+          />
+          <div className={styles.manualButtons}>
+            <button
+              style={{
+                width: '200px',
+                height: '70px',
+                backgroundColor: 'gray',
+                marginRight: '1rem'
+              }}
+              className={`${styles.button} ${styles.showAnswerButton}`}
+              onClick={handleShowBack}
+            >
+              Show Answer
+            </button>
 
-  <button
-    style={{
-      width: '200px',
-      height: '70px',
-      backgroundColor: 'gray'
-    }}
-    className={`${styles.button} ${styles.showAnswerButton}`}
-    onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
-  >
-    🚫 Give Up
-  </button>
-</div>
-
-  </>
-)}
-
+            <button
+              style={{
+                width: '200px',
+                height: '70px',
+                backgroundColor: 'gray'
+              }}
+              className={`${styles.button} ${styles.showAnswerButton}`}
+              onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
+            >
+              🚫 Give Up
+            </button>
+          </div>
+        </>
+      )}
 
       <div className={styles.buttonsContainer}>
         {!showBack ? (
@@ -435,11 +436,11 @@ const PracticeView: React.FC = () => {
         )}
 
         <div className={styles.toggleContainer}>
-          <label style = {{color: '#FFFFFF'}}>
+          <label style={{color: '#FFFFFF'}}>
             <input
               type="checkbox"
               checked={showBookmarkedOnly}
-              onChange={() => setShowBookmarkedOnly(prev => !prev)}
+              onChange={(e) => setShowBookmarkedOnly(e.target.checked)}
             />
             Practice Only Bookmarked Cards
           </label>

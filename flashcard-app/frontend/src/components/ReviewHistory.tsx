@@ -30,7 +30,7 @@ const ReviewHistory: React.FC = () => {
         
         if (!isCancelled) {
           const sorted = reviews.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-          setHistory(sorted.slice(0, 50)); // Limit to 50 recent
+          setHistory(sorted.slice(0, 100)); // Limit to 100 recent
         }
 
         // Load flashcards
