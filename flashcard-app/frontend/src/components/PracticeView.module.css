@@ -422,6 +422,7 @@
   font-size: 1.1rem;
   color: #e25822;
   margin-left: auto;
+  margin: auto;
 }
 .streakCounter {
   font-weight: bold;
@@ -519,4 +520,34 @@
   margin: 1rem 0;
   text-align: left;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1e1e1e;
+  padding: 1rem 2rem;
+  color: #ffffff;
+  border-bottom: 2px solid #333;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navItem {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.navItem:hover {
+  color: #fff;
 }

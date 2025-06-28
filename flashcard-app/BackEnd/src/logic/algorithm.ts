@@ -8,8 +8,9 @@
 import db from "src/db";
 import { PracticeRecord, ProgressStats } from "../types/index";
 import { Flashcard, AnswerDifficulty, BucketMap } from "./flashcards";
+import { loginUser, registerUser } from "src/userService";
 // Public: register
-app.post('/register', async (req, res) => {
+app.post('/register', async (req: { body: { username: any; password: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { userId?: any; error?: string; }): void; new(): any; }; }; }) => {
   const { username, password } = req.body;
   try {
     const userId = await registerUser(username, password);
@@ -20,7 +21,7 @@ app.post('/register', async (req, res) => {
 });
 
 // Public: login
-app.post('/login', async (req, res) => {
+app.post('/login', async (req: { body: { username: any; password: any; }; }, res: { json: (arg0: { token: any; }) => void; status: (arg0: number) => { (): any; new(): any; json: { (arg0: { error: string; }): void; new(): any; }; }; }) => {
   const { username, password } = req.body;
   const token = await loginUser(username, password);
   if (token) {

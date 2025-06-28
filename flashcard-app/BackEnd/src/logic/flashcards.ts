@@ -1,4 +1,7 @@
 export class Flashcard {
+  id(id: any, front: string, back: string, arg3: string | null, arg4: string, deckId: string, userId: string) {
+    throw new Error("Method not implemented.");
+  }
   constructor(
     public readonly front: string,        // Required parameter
     public readonly back: string,         // Required parameter

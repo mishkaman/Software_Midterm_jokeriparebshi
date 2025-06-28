@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flashcard } from '../types/index';
 import { fetchPracticeCards, submitAnswer, advanceDay } from '../services/api';
@@ -18,7 +20,7 @@ import {
 } from '../../utils/storage';
 import DailySummaryModal from './DailySummaryModal';
 import { useSearchParams } from 'react-router-dom';
-
+import Header from '../Header';
 const PracticeView: React.FC = () => {
   const [searchParams] = useSearchParams();
   const selectedDeckId = searchParams.get('deckId');

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Deck, Flashcard } from '../src/types';
 
 const STORAGE_KEY = 'flashcardData';
