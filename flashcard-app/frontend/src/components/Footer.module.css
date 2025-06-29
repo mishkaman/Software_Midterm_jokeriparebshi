@@ -1,0 +1,16 @@
+/* src/components/Footer.module.css */
+.footer {
+  background-color: #2c2c2c;
+  color: #bbb;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  border-top: 1px solid #444;
+  margin-top: auto;
+}
+
+.credit {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #888;
+}

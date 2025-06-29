@@ -13,6 +13,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import FlashcardForm from './components/FlashcardForm';
 import CreateCardForm from './components/CreateCardForm';
 import Header from './components/Header';
+import Footer from './components/Footer'; // ✅ import Footer
 
 function App() {
   return (
@@ -20,17 +21,21 @@ function App() {
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header />
 
-        <Routes>
-          <Route path="/" element={<PracticeView />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/history" element={<ReviewHistory />} />
-          <Route path="/retry" element={<RetryView />} />
-          <Route path="/decks" element={<DeckList />} />
-          <Route path="/decks/:deckId" element={<DeckDetails />} />
-          <Route path="/analytics" element={<AnalyticsDashboard />} />
-          <Route path="/flash" element={<FlashcardForm />} />
-          <Route path="/create" element={<CreateCardForm />} />
-        </Routes>
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<PracticeView />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/history" element={<ReviewHistory />} />
+            <Route path="/retry" element={<RetryView />} />
+            <Route path="/decks" element={<DeckList />} />
+            <Route path="/decks/:deckId" element={<DeckDetails />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/flash" element={<FlashcardForm />} />
+            <Route path="/create" element={<CreateCardForm />} />
+          </Routes>
+        </div>
+
+        <Footer /> {/* ✅ Footer added here */}
 
         <ToastContainer position="top-center" autoClose={3000} />
       </div>
