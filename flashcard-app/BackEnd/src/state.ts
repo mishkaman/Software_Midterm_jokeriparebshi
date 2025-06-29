@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // --------------- Flashcards -----------------
 
+<<<<<<< HEAD
 export function getAllCards(): Flashcard[] {
   const rows = db.prepare('SELECT * FROM flashcards').all();
   return rows.map(row => ({
@@ -15,6 +16,27 @@ export function getAllCards(): Flashcard[] {
     tags: row.tags ? JSON.parse(row.tags) : [],
     deckId: row.deckId,
   }));
+=======
+
+// --- Initial Sample Data ---
+const initialCards: Flashcard[] = [
+  new Flashcard("Capital of France", "Paris", "geo", "Starts with P", ["europe", "capital"]),
+  new Flashcard("2 + 2", "4", "math", "Basic addition", ["math", "easy"]),
+  new Flashcard("Water's chemical formula", "H2O", "science", "Two H's, one O", ["chemistry"]),
+  new Flashcard("Largest planet", "Jupiter", "space", "Gas giant", ["astronomy"]),
+];
+
+// --- In-Memory State ---
+let currentBuckets: BucketMap = new Map();
+currentBuckets.set(0, new Set(initialCards));
+
+let practiceHistory: PracticeRecord[] = [];
+let currentDay: number = 0;
+
+// --- State Accessors & Mutators ---
+export function getBuckets(): BucketMap {
+  return currentBuckets;
+>>>>>>> 4f7672da6b6b1c422f38fc8d5ed419cb9565b5c5
 }
 
 export function addCard(card: Flashcard) {
